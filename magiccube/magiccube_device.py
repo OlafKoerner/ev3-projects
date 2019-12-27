@@ -1,25 +1,14 @@
 #!/usr/bin/env python3
 
-from time import sleep
-from random import choice, randint
+import ev3dev.ev3 as ev3
 
-from ev3dev.auto import *
-import ev3dev.ev3 as ev3  # OKO fuer die Sound Funktion
+#  Connect motors on output ports
+motor_a = ev3.ServoMotor(ev3.OUTPUT_A)
+#assert motor_a.connected
 
-#  Connect two large motors on output ports B and C:
-motors = [LargeMotor(address) for address in (OUTPUT_B, OUTPUT_C)]
-
-# Every device in ev3dev has `connected` property. Use it to check that the
-# device has actually been connected.
-assert all([m.connected for m in motors]), \
-    "Two large motors should be connected to ports B and C"
-
-# Connect infrared and touch sensors.
-#ir = InfraredSensor();  assert ir.connected
-#us = UltrasonicSensor(); assert us.connected
-#ts = TouchSensor(); assert ts.connected
-cs = ColorSensor(); assert cs.connected
-
+# Connect color sensors
+#cs = ColorSensor()
+#assert cs.connected
 
 fNoColor = 0
 fBlack = 1
@@ -34,7 +23,18 @@ print('Robot Starting')
 ev3.Sound.speak('Okay folks... Let us solve the cube!').wait()
 
 # We will need to check EV3 buttons state
-btn = Button()
+btn = ev3.Button()
 
 
-def start():
+def main():
+    # 'R' turn right side clockwise
+    # 'L' turn left side clockwise
+    # 'F' turn front side clockwise
+    # 'B' turn back side clockwise
+    # 'U' turn up side clockwise
+    # 'D' turn down clockwise
+    # lower case letter means counter clockwise turn
+
+    command_string = "Uu"
+
+    motor_a.run(position_sp=100)
