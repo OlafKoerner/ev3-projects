@@ -3,8 +3,8 @@
 import ev3dev.ev3 as ev3
 
 #  Connect motors on output ports
-motor_a = ev3.ServoMotor(ev3.OUTPUT_A)
-#assert motor_a.connected
+motor_a = ev3.Motor(ev3.OUTPUT_A)
+assert motor_a.connected
 
 # Connect color sensors
 #cs = ColorSensor()
@@ -25,16 +25,16 @@ ev3.Sound.speak('Okay folks... Let us solve the cube!').wait()
 # We will need to check EV3 buttons state
 btn = ev3.Button()
 
+# 'R' turn right side clockwise
+# 'L' turn left side clockwise
+# 'F' turn front side clockwise
+# 'B' turn back side clockwise
+# 'U' turn up side clockwise
+# 'D' turn down clockwise
+# lower case letter means counter clockwise turn
 
-def main():
-    # 'R' turn right side clockwise
-    # 'L' turn left side clockwise
-    # 'F' turn front side clockwise
-    # 'B' turn back side clockwise
-    # 'U' turn up side clockwise
-    # 'D' turn down clockwise
-    # lower case letter means counter clockwise turn
+print('Motor start turning...')
+motor_a.run_to_rel_pos(position_sp=1000, speed_sp=100)
+print('... motor stopped turning.')
 
-    command_string = "Uu"
-
-    motor_a.run(position_sp=100)
+ev3.Sound.speak('Cube is solved!').wait()
