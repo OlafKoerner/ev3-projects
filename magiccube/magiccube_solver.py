@@ -263,11 +263,32 @@ class CubeSolver:
         for ws in wrong_edge_stones:
             cs = self.cube.get_correct_stone(ws)
             cp = ws.position
-            if self.cube.stone_on_side(cs, self.cube.get_side_of_color(SIDE_COL_YELLOW)):
-                # print(np.linalg.norm(cp, cs.position))
-                while np.dot(cp, cs.position) != 0:
-                    self.cube.turn_side('U')
-                self.cube.turn_side('ULrflR')
+            if not self.cube.stone_on_side(cs, self.cube.get_side_of_color(SIDE_COL_YELLOW)):
+                while not self.cube.stone_on_side(cs, SIDE_DIR_FRONT):
+                    self.cube.turn_cube(self.cube.rotz)
+                while not self.cube.stone_on_side(cs, self.cube.get_side_of_color(SIDE_COL_YELLOW)):
+                    self.cube.turn_side('F')
+                self.cube.turn_side('Uf')
+
+            # print(np.linalg.norm(cp, cs.position))
+            print(cp, cs.position, np.dot(cp, cs.position))
+            while np.dot(cp, cs.position) != 0:
+                self.cube.turn_side('U')
+                print(cp, cs.position, np.dot(cp, cs.position))
+            print(ws.position, np.dot(ws.position, SIDE_DIR_FRONT))
+            while not self.cube.stone_on_side(ws, SIDE_DIR_FRONT):
+                self.cube.turn_cube(self.cube.rotz)
+                print(ws.position, np.dot(ws.position, SIDE_DIR_FRONT))
+            for f in cs.faces:
+                print(f.color, SIDE_COL_WHITE)
+                if f.color == SIDE_COL_WHITE:
+                    print(f.direction, SIDE_DIR_WHITE)
+                    if np.dot(f.direction, SIDE_DIR_WHITE) == -1:
+                        print('UULrfflR')
+                        self.cube.turn_side('LrfflR')
+                    else:
+                        print('ULrflR')
+                        self.cube.turn_side('ULrflR')
 
 
 def main():
@@ -288,7 +309,7 @@ def main():
     fig.show()
 
     # turn sides
-    cube.turn_side('FFUrLrrbFllRudlRflflfl')
+    cube.turn_side('RfLRFRFLfLf')
     fig.show()
     fig.canvas.flush_events()
 
@@ -298,39 +319,10 @@ def main():
     cube_solver.build_down_side()
     fig.show()
     fig.canvas.flush_events()
-    ''' ''
+
     t.sleep(5)
 
-    cube.turn_side('U')
-    fig.show()
-    fig.canvas.flush_events()
-
-    t.sleep(2)
-    cube.turn_side('L')
-    fig.show()
-    fig.canvas.flush_events()
-    t.sleep(2)
-    cube.turn_side('r')
-    fig.show()
-    fig.canvas.flush_events()
-
-    t.sleep(2)
-    cube.turn_side('f')
-    fig.show()
-    fig.canvas.flush_events()
-
-    t.sleep(2)
-    cube.turn_side('l')
-    fig.show()
-    fig.canvas.flush_events()
-    t.sleep(2)
-    cube.turn_side('R')
-    fig.show()
-    fig.canvas.flush_events()
-    '''
-
     print('end')
-
 
 if __name__ == "__main__":
     main()
