@@ -280,6 +280,8 @@ class Cube:
                 if np.union1d(target_face_colors, stone_face_colors).size == target_face_colors.size:
                     return s
 
+    def is_min_corner_dist(self, cs1, cs2):
+        return np.linalg.norm(cs1 - cs2) == 2
 
 class CubeSolver:
 
@@ -327,8 +329,23 @@ class CubeSolver:
         for ws in wrong_corner_stones:
             cs = self.cube.get_correct_stone(ws)
             cp = ws.position
+
+            # ensure corner on up-side
+            #if not self.cube.stone_on_side(cs, SIDE_DIR_UP):
+            #    ...
+
+            while not self.cube.is_min_corner_dist(cp, cs.position):
+                self.cube.turn_side('U')
             while not self.cube.stone_on_side(cs, SIDE_DIR_FRONT):
                 self.cube.turn_cube(self.cube.rotz)
+            if self.cube.stone_on_side(cs, SIDE_DIR_RIGHT):
+                # move right corner stone to white bottom side
+                self.cube.turn_side('URur')
+            else:
+                # move left corner stone to white bottom side
+                self.cube.turn_side('ulUL')
+
+
 
             '''
             print(cp, cs.position, np.dot(cp, cs.position))
@@ -369,7 +386,7 @@ def main():
     fig.show()
 
     # turn sides
-    cube.turn_side('R')
+    cube.turn_side('RR')
     fig.show()
     fig.canvas.flush_events()
 
