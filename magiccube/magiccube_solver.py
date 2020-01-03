@@ -13,7 +13,7 @@ FACE_SIZE = 0.4
 SIDE_DIR_RED = (0, 1, 0)
 SIDE_COL_RED = 'r'
 SIDE_DIR_ORANGE = (0, -1, 0)
-SIDE_COL_ORANGE = [1.0, 0.25, 0.0]
+SIDE_COL_ORANGE = [1.0, 0.4, 0.0]
 SIDE_DIR_YELLOW = (0, 0, 1)
 SIDE_COL_YELLOW = 'y'
 SIDE_DIR_WHITE = (0, 0, -1)
@@ -301,10 +301,15 @@ class CubeSolver:
         # build edges on white side
         wrong_edge_stones = self.cube.get_wrong_edge_stones(self.cube.get_side_of_color(SIDE_COL_WHITE))
         print('number of wrong edge stones at white side: ', wrong_edge_stones.size)
+        # replace all posiions with wrong edges by the correct stones
         for ws in wrong_edge_stones:
+            # store correct stone
             cs = self.cube.get_correct_stone(ws)
+            # store position where this stone must be placed
             cp = ws.position
+            # check if corret stone is on yellow/upper side
             if not self.cube.stone_on_side(cs, self.cube.get_side_of_color(SIDE_COL_YELLOW)):
+                #
                 while not self.cube.stone_on_side(cs, SIDE_DIR_FRONT):
                     self.cube.turn_cube(self.cube.rotz)
                 while not self.cube.stone_on_side(cs, self.cube.get_side_of_color(SIDE_COL_YELLOW)):
@@ -324,7 +329,7 @@ class CubeSolver:
                 if f.color == SIDE_COL_WHITE:
                     print(f.direction, SIDE_DIR_WHITE)
                     if np.dot(f.direction, SIDE_DIR_WHITE) == -1:
-                        print('UULrfflR')
+                        print('LrfflR')
                         self.cube.turn_side('LrfflR')
                     else:
                         print('ULrflR')
