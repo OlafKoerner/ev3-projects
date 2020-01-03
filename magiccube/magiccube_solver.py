@@ -1,5 +1,7 @@
 import msvcrt as ms
 import numpy as np
+import matplotlib
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import math as m
 from mpl_toolkits.mplot3d import Axes3D
