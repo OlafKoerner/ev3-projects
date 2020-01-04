@@ -1,8 +1,12 @@
-import msvcrt as ms
+#import msvcrt as ms
 import numpy as np
 import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
+import matplotlib
+import platform
+#if platform.system() == 'Darwin':
+#    matplotlib.use('MacOSX')
 import math as m
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection, Line3DCollection
@@ -391,6 +395,7 @@ def main():
 
     # init cube
     cube = Cube(ax)
+    #plt.show(block=False)
     fig.show()
 
     # turn sides
@@ -405,7 +410,8 @@ def main():
     fig.show()
     fig.canvas.flush_events()
 
-    t.sleep(5)
+    while 1: t.sleep(0.1)
+    #t.sleep(5)
 
     print('end')
 
