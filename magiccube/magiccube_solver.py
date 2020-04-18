@@ -309,7 +309,6 @@ class CubeSolver:
             cp = ws.position
             # check if corret stone is on yellow/upper side
             if not self.cube.stone_on_side(cs, self.cube.get_side_of_color(SIDE_COL_YELLOW)):
-                #
                 while not self.cube.stone_on_side(cs, SIDE_DIR_FRONT):
                     self.cube.turn_cube(self.cube.rotz)
                 while not self.cube.stone_on_side(cs, self.cube.get_side_of_color(SIDE_COL_YELLOW)):
@@ -394,7 +393,7 @@ def main():
     fig.show()
 
     # turn sides
-    cube.turn_side('RURDLULD')
+    cube.turn_side('R')
     fig.show()
     fig.canvas.flush_events()
 
