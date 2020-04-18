@@ -57,4 +57,7 @@ def main(p1, p2, p3, p4):
     while motor_b.is_running: sleep(0.1)
     sleep(1)
 
+    motor_a.stop(stop_action="coast")
+    motor_b.stop(stop_action="coast")
+
     ev3.Sound.speak('Cube is solved!').wait()
