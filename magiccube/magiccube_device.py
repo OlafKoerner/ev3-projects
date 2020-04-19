@@ -154,7 +154,7 @@ switcher = {
     'U': turn_U(),
     'u': turn_u(),
     'D': turn_D(),
-    'd': turn_d(),
+    'd': turn_d()
 }
 
 def turn_sides(cmd):
@@ -182,8 +182,16 @@ def main(args):
     ev3.Sound.speak('Okay folks... Let us solve the cube!').wait()
     print('Motor start turning...')
 
-    for cmd in args:
-        turn_side(cmd)
+    #turn_side('DdRrUu')
+    turn_D()
+    turn_d()
+    turn_R()
+    turn_r()
+    turn_U()
+    turn_u()
+
+    #for cmd in args:
+    #   turn_side(cmd)
 
     motor_a.stop(stop_action="coast")
     motor_b.stop(stop_action="coast")
