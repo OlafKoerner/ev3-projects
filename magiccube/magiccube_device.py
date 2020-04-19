@@ -5,10 +5,10 @@ from time import sleep
 
 # connect motors to output ports
 motor_a = ev3.Motor(ev3.OUTPUT_A)
-assert motor_a.connected
+#assert motor_a.connected
 
 motor_b = ev3.Motor(ev3.OUTPUT_B)
-assert motor_b.connected
+#assert motor_b.connected
 
 # definition of motor moves
 def down():
@@ -141,7 +141,7 @@ def turn_d():
     # 'U' turn up side clockwise
     # 'D' turn down clockwise
     # lower case letter means counter clockwise turn
-
+"""
 switcher = {
     'R': turn_R(),
     'r': turn_r(),
@@ -156,6 +156,7 @@ switcher = {
     'D': turn_D(),
     'd': turn_d()
 }
+"""
 
 def turn_sides(cmd):
     for chr in cmd:
