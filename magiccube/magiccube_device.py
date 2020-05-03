@@ -5,18 +5,19 @@ from time import sleep
 
 # connect motors to output ports
 motor_a = ev3.Motor(ev3.OUTPUT_A)
-# assert motor_a.connected
+assert motor_a.connected
+motor_a_null_pos = motor_a.position
 
 motor_b = ev3.Motor(ev3.OUTPUT_B)
+assert motor_b.connected
+motor_b_null_pos = motor_b.position
 
-
-# assert motor_b.connected
 
 # definition of motor moves
 def down():
     print('down')
     print('first position: ', motor_a.position)
-    motor_a.run_to_abs_pos(position=motor_a_null_pos+120, speed_sp=200, stop_action='hold')
+    motor_a.run_to_abs_pos(position_sp=motor_a_null_pos+120, speed_sp=200, stop_action='hold')
     while motor_a.is_running:
         print('position: ', motor_a.position, '   position_sp: ', motor_a.position_sp)
         sleep(0.1)
@@ -25,19 +26,19 @@ def down():
 
 def flip():
     print('flip')
-    motor_a.run_to_abs_pos(position=motor_a_null_pos+120, speed_sp=200, stop_action='hold')
+    motor_a.run_to_abs_pos(position_sp=motor_a_null_pos+120, speed_sp=200, stop_action='hold')
     while motor_a.is_running: sleep(0.1)
     sleep(1)
-    motor_a.run_to_abs_pos(position=motor_a_null_pos-120, speed_sp=200, stop_action='hold')
+    motor_a.run_to_abs_pos(position_sp=motor_a_null_pos+180, speed_sp=200, stop_action='hold')
     while motor_a.is_running: sleep(0.1)
-    sleep(5)
+    sleep(1)
 
 
 def rot(x):
-    motor_b.run_to_abs_pos(position=motor_b_null_pos-1120 * x, speed_sp=200, stop_action='hold')
+    motor_b.run_to_abs_pos(position_sp=motor_b_null_pos-1120 * x, speed_sp=200, stop_action='hold')
     while motor_b.is_running: sleep(0.1)
     sleep(1)
-    motor_b.run_to_abs_pos(position=motor_b_null_pos+30 * x / abs(x), speed_sp=200, stop_action='hold')
+    motor_b.run_to_abs_pos(position_sp=motor_b_null_pos+(1090 * x / abs(x)), speed_sp=200, stop_action='hold')
     while motor_b.is_running: sleep(0.1)
     sleep(1)
 
@@ -45,11 +46,11 @@ def rot(x):
 def up():
     print('up')
     print('first position: ', motor_a.position)
-    motor_a.run_to_abs_pos(position=motor_a_null_pos-120, speed_sp=200, stop_action='hold')
+    motor_a.run_to_abs_pos(position_sp=motor_a_null_pos, speed_sp=200, stop_action='hold')
     while motor_a.is_running:
         print('position: ', motor_a.position, '   position_sp: ', motor_a.position_sp)
         sleep(0.1)
-    sleep(5)
+    sleep(1)
 
 
 # definition of turns
@@ -213,22 +214,15 @@ def main(args):
     ev3.Sound.speak('Okay folks... Let us solve the cube!').wait()
     print('Motor start turning...')
 
-    motor_a_null_pos = motor_a.position
-    motor_b_null_pos = motor_b.position
-
     # turn_side('DdRrUu')
-    # turn_D()
+    #turn_D()
     # turn_d()
     # turn_R()
     # turn_r()
     # turn_U()
     # turn_u()
 
-    down()
-    up()
-    down()
-    flip()
-    up()
+    rot(0.25)
 
 
     # for cmd in args:
