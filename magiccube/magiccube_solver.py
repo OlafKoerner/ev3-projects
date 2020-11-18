@@ -125,6 +125,10 @@ class Stone:
         for f in self.faces:
             f.rotate(rot_mat)
 
+    def get_col_of_dir(self, dir):
+        for f in self.faces:
+            if np.dot(f.direction, dir) == 1 :
+                    return f.color
 
 class Cube:
     # class vars
@@ -187,6 +191,25 @@ class Cube:
     def get_side_of_color(self, color):
         for s in self.stones:
             if s.faces.size == 1 and s.faces[0].color == color: return s.faces[0].direction
+
+    def get_edge_stone(self, col1, col2):
+        for s in self.stones:
+            if s.faces.size == 2:
+                colors = np.array([])
+                for f in s.faces:
+                    colors = np.append(colors, f.color)
+                if np.union1d(colors, np.append(col1, col2)).size == 2:
+                    return s
+        error('edge stone not found. code line ', get_linenumber(), ERR_ACTION_EXIT)
+
+    def get_corner_stone(self, col1, col2, col3):
+        colors = np.array([])
+        for s in self.stones:
+            if s.faces.size == 3:
+                for f in s.faces:
+                    colors = np.append(colors, f.color)
+                if np.union1d(colors, [col1, col2, col3]).size == 3:
+                    return s
 
     def stones_side(self, side):
         y = np.array([])
@@ -256,6 +279,7 @@ class Cube:
         fig.canvas.flush_events()
         t.sleep(2)
 
+    '''
     def is_stone_pos_correct(self, s):
         stone_colors = np.array([])
         side_colors = np.array([])
@@ -269,12 +293,12 @@ class Cube:
         else:
             print(stone_colors, side_colors, 'false')
             return False
-
-    def is_stone_orientation_correct(self, s):
+    '''
+    def is_stone_correct(self, s):
         for f in s.faces:
             if self.get_color_of_side(f.direction) != f.color:
                 return False
-            return True
+        return True
 
     def stone_on_side(self, s, side):
         # print(s.position, ' * ', side, ' = ', np.dot(s.position, side))
@@ -288,7 +312,7 @@ class Cube:
         ws = np.array([])
         for s in s_side:
             if s.faces.size == 2:
-                if not self.is_stone_pos_correct(s): ws = np.append(ws, s)
+                if not self.is_stone_correct(s): ws = np.append(ws, s)
         return ws
 
     def get_wrong_corner_stones(self, side):
@@ -296,7 +320,7 @@ class Cube:
         ws = np.array([])
         for s in s_side:
             if s.faces.size == 3:
-                if not self.is_stone_pos_correct(s): ws = np.append(ws, s)
+                if not self.is_stone_correct(s): ws = np.append(ws, s)
         return ws
 
     def get_correct_stone(self, ws):
@@ -379,7 +403,7 @@ class CubeSolver:
                         self.cube.turn_side('ULrflR')
 
         print('white edges as bottom side are correct')
-        t.sleep(10)
+        t.sleep(5)
 
         # build corners on white side
         wrong_corner_stones = self.cube.get_wrong_corner_stones(self.cube.get_side_of_color(SIDE_COL_WHITE))
@@ -388,24 +412,25 @@ class CubeSolver:
             cs = self.cube.get_correct_stone(ws)
             cp = ws.position
             # check if stone not already on right place due to former moves
-            if np.linalg.norm(cp - cs.position) != 0:
-                # check if correct stone not on front/upper side
-                if not (self.cube.stone_on_side(cs, SIDE_DIR_FRONT) and self.cube.stone_on_side(cs, SIDE_DIR_UP)):
-                    # ensure correct corner on front-side
-                    while_counter = 0
-                    while not self.cube.stone_on_side(cs, SIDE_DIR_FRONT) and not error_endless_loop(4, get_linenumber()):
-                        self.cube.turn_cube(self.cube.rotz)
-                        cp = self.cube.rotz.dot(cp)  # if cube is turned then rotate as well target position for the correct stone !!!
-                    print('correct corner on front-side')
-                    print(cp, cs.position)
+            if not self.cube.is_stone_correct(cs):
+                # ensure correct stone is on front side
+                while_counter = 0
+                while not self.cube.stone_on_side(cs, SIDE_DIR_FRONT) and not error_endless_loop(4, get_linenumber()):
+                    self.cube.turn_cube(self.cube.rotz)
+                    cp = self.cube.rotz.dot(cp)  # if cube is turned then rotate as well target position for the correct stone !!!
+                print('correct corner on front-side')
+
+                if not self.cube.stone_on_side(cs, SIDE_DIR_UP):
                     # move correct corner stone to front/upper side
                     if self.cube.stone_on_side(cs, SIDE_DIR_LEFT) and self.cube.stone_on_side(cs, SIDE_DIR_DOWN):
                         self.cube.turn_side('FUfu')
                     elif self.cube.stone_on_side(cs, SIDE_DIR_RIGHT) and self.cube.stone_on_side(cs, SIDE_DIR_DOWN):
                         self.cube.turn_side('fuFU')
-                    #else: error('error in solver: failed to move corner stone to front/upper side in line #', get_linenumber(), ERR_ACTION_EXIT)
+                    else:
+                        error('error in solver: failed to move corner stone to front/upper side in line #', get_linenumber(), ERR_ACTION_EXIT)
                     print('correct corner stone on front/upper side')
                     print(cp, cs.position)
+
                 while_counter = 0
                 while not self.cube.is_min_corner_dist(cp, cs.position) and not error_endless_loop(4, get_linenumber()):
                     self.cube.turn_side('U')
@@ -415,34 +440,45 @@ class CubeSolver:
                     cp = self.cube.rotz.dot(cp)  # if cube is turned then rotate as well target position for the correct stone !!!
                 if self.cube.stone_on_side(cs, SIDE_DIR_RIGHT):
                     # move right corner stone to white bottom side
-                    self.cube.turn_side('URur')
+                    if cs.get_col_of_dir(SIDE_DIR_FRONT) == SIDE_COL_WHITE :
+                        self.cube.turn_side('URur')
+                    elif cs.get_col_of_dir(SIDE_DIR_RIGHT) == SIDE_COL_WHITE :
+                        self.cube.turn_side('RUr')
+                    elif cs.get_col_of_dir(SIDE_DIR_UP) == SIDE_COL_WHITE :
+                        self.cube.turn_side('RurfUUF')
+                    else:
+                        error('inconsistent faces of stone', get_linenumber(), ERR_ACTION_EXIT)
                 else:
                     # move left corner stone to white bottom side
-                    self.cube.turn_side('ulUL')
-
+                    if cs.get_col_of_dir(SIDE_DIR_FRONT) == SIDE_COL_WHITE :
+                        self.cube.turn_side('ulUL')
+                    elif cs.get_col_of_dir(SIDE_DIR_LEFT) == SIDE_COL_WHITE :
+                        self.cube.turn_side('luL')
+                    elif cs.get_col_of_dir(SIDE_DIR_UP) == SIDE_COL_WHITE :
+                        self.cube.turn_side('lURFuuf')
+                    else:
+                        error('inconsistent faces of stone', get_linenumber(), ERR_ACTION_EXIT)
                 print(cp, cs.position, np.dot(cp, cs.position))
-                '''
-                while_counter = 0
-                while np.dot(cp, cs.position) != 0 and not error_endless_loop(4, get_linenumber()):
-                    self.cube.turn_side('U')
-                    print(cp, cs.position, np.dot(cp, cs.position))
-                print(ws.position, np.dot(ws.position, SIDE_DIR_FRONT))
-                '''
-                while_counter = 0
-                while not self.cube.stone_on_side(ws, SIDE_DIR_FRONT) and not error_endless_loop(4, get_linenumber()):
-                    self.cube.turn_cube(self.cube.rotz)
-                    cp = self.cube.rotz.dot(cp)  # if cube is turned then rotate as well target position for the correct stone !!!
-                    print(ws.position, np.dot(ws.position, SIDE_DIR_FRONT))
-                for f in cs.faces:
-                    print(f.color, SIDE_COL_WHITE)
-                    if f.color == SIDE_COL_WHITE:
-                        print(f.direction, SIDE_DIR_WHITE)
-                        if np.dot(f.direction, SIDE_DIR_WHITE) == -1:
-                            print('UULrfflR')
-                            self.cube.turn_side('LrfflR')
-                        else:
-                            print('ULrflR')
-                            self.cube.turn_side('ULrflR')
+
+    def build_mid_ring(self):
+        mid_stones = np.append(
+            self.cube.get_edge_stone(SIDE_COL_RED, SIDE_COL_GREEN),
+            self.cube.get_edge_stone(SIDE_COL_RED, SIDE_COL_BLUE),
+            self.cube.get_edge_stone(SIDE_COL_ORANGE, SIDE_COL_GREEN),
+            self.cube.get_edge_stone(SIDE_COL_ORANGE, SIDE_COL_BLUE))
+
+        for ms in mid_stones:
+            if not self.cube.is_stone_correct(ms):
+                # if mid stone not on UP side, then move to UP side
+                if not self.cube.stone_on_side(SIDE_DIR_UP, ms):
+                    # ensure that mid stone is on front side
+                    while not self.cube.stone_on_side(SIDE_DIR_FRONT, ms):
+                        self.cube.turn_cube(self.cube.rotz)
+                    # move mid stone to UP side
+                    if self.cube.stone_on_side(SIDE_DIR_RIGHT, ms):
+                        self.cube.turn_side(URurufUF)
+                    elif self.cube.stone_on_side(SIDE_DIR_LEFT, ms):
+                        self.cube.turn_side(ulULUFUf)
 
 def main():
     # init graphics
@@ -466,7 +502,7 @@ def main():
     fig.show()
 
     # turn sides
-    cube.turn_side('RBLF')
+    cube.turn_side('')
     fig.show()
     fig.canvas.flush_events()
 
@@ -474,6 +510,7 @@ def main():
 
     cube_solver = CubeSolver(cube)
     cube_solver.build_down_side()
+    cube_solver.build_mid_ring()
     fig.show()
     fig.canvas.flush_events()
 
