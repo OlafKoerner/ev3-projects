@@ -195,21 +195,16 @@ class Cube:
     def get_edge_stone(self, col1, col2):
         for s in self.stones:
             if s.faces.size == 2:
-                colors = np.array([])
-                for f in s.faces:
-                    colors = np.append(colors, f.color)
-                if np.union1d(colors, np.append(col1, col2)).size == 2:
+                if sorted(s.faces[0].color + s.faces[1].color) == sorted(col1 + col2):
                     return s
         error('edge stone not found. code line ', get_linenumber(), ERR_ACTION_EXIT)
 
     def get_corner_stone(self, col1, col2, col3):
-        colors = np.array([])
         for s in self.stones:
             if s.faces.size == 3:
-                for f in s.faces:
-                    colors = np.append(colors, f.color)
-                if np.union1d(colors, [col1, col2, col3]).size == 3:
+                if sorted(s.faces[0].color + s.faces[1].color + s.faces[2].color) == sorted(col1 + col2 + col3):
                     return s
+        error('corner stone not found. code line ', get_linenumber(), ERR_ACTION_EXIT)
 
     def stones_side(self, side):
         y = np.array([])
@@ -279,7 +274,6 @@ class Cube:
         fig.canvas.flush_events()
         t.sleep(1)
 
-    '''
     def is_stone_pos_correct(self, s):
         stone_colors = np.array([])
         side_colors = np.array([])
@@ -293,7 +287,7 @@ class Cube:
         else:
             print(stone_colors, side_colors, 'false')
             return False
-    '''
+
     def is_stone_correct(self, s):
         for f in s.faces:
             if self.get_color_of_side(f.direction) != f.color:
@@ -511,6 +505,43 @@ class CubeSolver:
                     self.cube.turn_side('ulULUFuf')
                 else:
                     error('mixed up mid stones in line ', get_linenumber(), ERR_ACTION_EXIT)
+
+    def build_top_edges(self):
+        top_edges = np.array([])
+        num_correct_top_edges = np.array(range(4))
+        top_edges = np.append(top_edges,
+                               [self.cube.get_edge_stone(SIDE_COL_YELLOW, SIDE_COL_BLUE),
+                                self.cube.get_edge_stone(SIDE_COL_YELLOW, SIDE_COL_RED),
+                                self.cube.get_edge_stone(SIDE_COL_YELLOW, SIDE_COL_GREEN),
+                                self.cube.get_edge_stone(SIDE_COL_YELLOW, SIDE_COL_ORANGE)])
+        for turn in range(4):
+            num_correct_top_edges[turn] = 0
+            for s in top_edges:
+                if self.cube.is_stone_pos_correct(s):
+                    num_correct_top_edges[turn] =+ 1
+            self.cube.turn_side('U')
+
+        # if max correct top edges only one, then directly start edges switching and recount correct top edges
+        if np.amax(num_correct_top_edges) == 1:
+            # switch top edges
+            self.cube.turn_side('UFRUruf')
+            # recount correct top edges
+            for turn in range(4):
+                num_correct_top_edges[turn] = 0
+                for s in top_edges:
+                    if self.cube.is_stone_pos_correct(s):
+                        num_correct_top_edges[turn] = + 1
+                self.cube.turn_side('U')
+
+        # turn UP side to position with max correct top edges
+        print('turn UP side to position with max correct top edges. turns are: ', np.argmax(num_correct_top_edges))
+        for turn in range(np.argmax(num_correct_top_edges)):
+            self.cube.turn_side('U')
+        while not (not self.cube.is_stone_pos_correct(self.cube.get_edge_stone(SIDE_COL_YELLOW, self.cube.get_color_of_side(SIDE_DIR_FRONT))) and
+                   not self.cube.is_stone_pos_correct(self.cube.get_edge_stone(SIDE_COL_YELLOW, self.cube.get_color_of_side(SIDE_DIR_LEFT)))):
+            self.cube.turn_cube(self.cube.rotz)
+        self.cube.turn_side('UFRUruf')
+        ##### Problem, wenn nur die gegenueberliegenden edge stones passen
 def main():
     # init graphics
     #fig = plt.figure()
@@ -534,7 +565,8 @@ def main():
 
     # turn sides
     #cube.turn_side('URurufUFUUulULUFuf') #wrong mid stones
-    cube.turn_side('RBLF')
+    cube.turn_side('RBLF') #completely destroyed
+    #cube.turn_side('Rr')
 
     fig.show()
     fig.canvas.flush_events()
@@ -544,6 +576,7 @@ def main():
     cube_solver = CubeSolver(cube)
     cube_solver.build_down_side()
     cube_solver.build_mid_ring()
+    cube_solver.build_top_edges()
     fig.show()
     fig.canvas.flush_events()
 
