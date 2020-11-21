@@ -269,7 +269,7 @@ class Cube:
             self.draw()
             fig.show()
             fig.canvas.flush_events()
-            t.sleep(2)
+            t.sleep(1)
 
     def turn_cube(self, rot_mat):
         for s in self.stones:
@@ -277,7 +277,7 @@ class Cube:
         self.draw()
         fig.show()
         fig.canvas.flush_events()
-        t.sleep(2)
+        t.sleep(1)
 
     '''
     def is_stone_pos_correct(self, s):
@@ -329,14 +329,14 @@ class Cube:
         for f in ws.faces:
             current_face_colors = np.append(current_face_colors, f.color)
             target_face_colors = np.append(target_face_colors, self.get_color_of_side(f.direction))
-        print('current face colors: ', current_face_colors)
-        print('target face colors: ', target_face_colors)
+        #print('current face colors: ', current_face_colors)
+        #print('target face colors: ', target_face_colors)
 
         for s in self.stones:
             if s.faces.size == target_face_colors.size:
                 stone_face_colors = np.array([])
                 for f in s.faces: stone_face_colors = np.append(stone_face_colors, f.color)
-                print('stone face colors : ', stone_face_colors)
+                #print('stone face colors : ', stone_face_colors)
                 # union1d: return the unique, sorted array of values that are in either of the two input arrays
                 if np.union1d(target_face_colors, stone_face_colors).size == target_face_colors.size:
                     return s
@@ -403,7 +403,7 @@ class CubeSolver:
                         self.cube.turn_side('ULrflR')
 
         print('white edges as bottom side are correct')
-        t.sleep(5)
+        t.sleep(1)
 
         # build corners on white side
         wrong_corner_stones = self.cube.get_wrong_corner_stones(self.cube.get_side_of_color(SIDE_COL_WHITE))
@@ -461,25 +461,56 @@ class CubeSolver:
                 print(cp, cs.position, np.dot(cp, cs.position))
 
     def build_mid_ring(self):
-        mid_stones = np.append(
-            self.cube.get_edge_stone(SIDE_COL_RED, SIDE_COL_GREEN),
+        mid_stones = np.array([])
+        mid_stones = np.append(mid_stones,
+            [self.cube.get_edge_stone(SIDE_COL_RED, SIDE_COL_GREEN),
             self.cube.get_edge_stone(SIDE_COL_RED, SIDE_COL_BLUE),
             self.cube.get_edge_stone(SIDE_COL_ORANGE, SIDE_COL_GREEN),
-            self.cube.get_edge_stone(SIDE_COL_ORANGE, SIDE_COL_BLUE))
+            self.cube.get_edge_stone(SIDE_COL_ORANGE, SIDE_COL_BLUE)])
 
         for ms in mid_stones:
+            print('mid stone colors: ', ms.faces[0].color, ms.faces[1].color, 'correct? ', self.cube.is_stone_correct(ms))
+
+        for ms in mid_stones:
+            print('mid stone colors: ', ms.faces[0].color, ms.faces[1].color, 'correct? ',
+                  self.cube.is_stone_correct(ms))
             if not self.cube.is_stone_correct(ms):
                 # if mid stone not on UP side, then move to UP side
-                if not self.cube.stone_on_side(SIDE_DIR_UP, ms):
+                if not self.cube.stone_on_side(ms, SIDE_DIR_UP):
                     # ensure that mid stone is on front side
-                    while not self.cube.stone_on_side(SIDE_DIR_FRONT, ms):
+                    print('move mid stone to front')
+                    while not self.cube.stone_on_side(ms, SIDE_DIR_FRONT):
                         self.cube.turn_cube(self.cube.rotz)
                     # move mid stone to UP side
-                    if self.cube.stone_on_side(SIDE_DIR_RIGHT, ms):
-                        self.cube.turn_side(URurufUF)
-                    elif self.cube.stone_on_side(SIDE_DIR_LEFT, ms):
-                        self.cube.turn_side(ulULUFUf)
-
+                    print('move mid stone to up side')
+                    if self.cube.stone_on_side(ms, SIDE_DIR_RIGHT):
+                        self.cube.turn_side('URurufUF')
+                    elif self.cube.stone_on_side(ms, SIDE_DIR_LEFT):
+                        self.cube.turn_side('ulULUFuf')
+                    else:
+                        error('mixed up mid stones in line ', get_linenumber(), ERR_ACTION_EXIT)
+                print('move mid stone on up side to correct side with same color')
+                print('color of face0 side:', self.cube.get_color_of_side(ms.faces[0].direction), 'color of face0: ',
+                      ms.faces[0].color)
+                print('color of face1 side:', self.cube.get_color_of_side(ms.faces[1].direction), 'color of face1: ',
+                      ms.faces[1].color)
+                while not ( self.cube.get_color_of_side(ms.faces[0].direction) == ms.faces[0].color or
+                            self.cube.get_color_of_side(ms.faces[1].direction) == ms.faces[1].color):
+                    self.cube.turn_side('U')
+                    print('color of face0 side:', self.cube.get_color_of_side(ms.faces[0].direction), 'color of face0: ', ms.faces[0].color)
+                    print('color of face1 side:', self.cube.get_color_of_side(ms.faces[1].direction), 'color of face1: ', ms.faces[1].color)
+                print('turn cube till correct mid stone is at front side')
+                while not self.cube.stone_on_side(ms, SIDE_DIR_FRONT):
+                    self.cube.turn_cube(self.cube.rotz)
+                print('insert mid stone to correct position')
+                if (ms.faces[0].color == self.cube.get_color_of_side(SIDE_DIR_RIGHT) or
+                    ms.faces[1].color == self.cube.get_color_of_side(SIDE_DIR_RIGHT)):
+                    self.cube.turn_side('URurufUF')
+                elif (ms.faces[0].color == self.cube.get_color_of_side(SIDE_DIR_LEFT) or
+                      ms.faces[1].color == self.cube.get_color_of_side(SIDE_DIR_LEFT)):
+                    self.cube.turn_side('ulULUFuf')
+                else:
+                    error('mixed up mid stones in line ', get_linenumber(), ERR_ACTION_EXIT)
 def main():
     # init graphics
     #fig = plt.figure()
@@ -502,7 +533,9 @@ def main():
     fig.show()
 
     # turn sides
-    cube.turn_side('')
+    #cube.turn_side('URurufUFUUulULUFuf') #wrong mid stones
+    cube.turn_side('RBLF')
+
     fig.show()
     fig.canvas.flush_events()
 
@@ -516,7 +549,9 @@ def main():
 
     print('end')
 
-    while 1: t.sleep(0.1)
+    while 1:
+        t.sleep(0.5)
+        cube.turn_cube(cube.rotz)
     #t.sleep(5)
 
 
