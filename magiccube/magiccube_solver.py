@@ -273,7 +273,7 @@ class Cube:
         fig.show()
         fig.canvas.flush_events()
         t.sleep(1)
-
+    '''
     def is_stone_pos_correct(self, s):
         stone_colors = np.array([])
         side_colors = np.array([])
@@ -282,10 +282,22 @@ class Cube:
             side_colors = np.append(side_colors, self.get_color_of_side(f.direction))
         # union1d: return the unique, sorted array of values that are in either of the two input arrays
         if np.union1d(stone_colors, side_colors).size == side_colors.size:
-            print(stone_colors, side_colors, 'true')
+            #print(stone_colors, side_colors, 'true')
             return True
         else:
-            print(stone_colors, side_colors, 'false')
+            #print(stone_colors, side_colors, 'false')
+            return False
+    '''
+
+    def is_stone_pos_correct(self, s):
+        col1 = ''
+        col2 = ''
+        for f in s.faces:
+            col1 = col1 + f.color
+            col2 = col2 + self.get_color_of_side(f.direction)
+        if sorted(col1) == sorted(col2):
+            return True
+        else:
             return False
 
     def is_stone_correct(self, s):
@@ -336,7 +348,7 @@ class Cube:
                     return s
 
     def is_min_corner_dist(self, cs1, cs2):
-        print('corner dist: ', np.linalg.norm(cs1 - cs2))
+        #print('corner dist: ', np.linalg.norm(cs1 - cs2))
         return np.linalg.norm(cs1 - cs2) == 2
 
 class CubeSolver:
@@ -372,28 +384,26 @@ class CubeSolver:
                 else: error('error in solver: bottom edge stone not found in line #', get_linenumber(), ERR_ACTION_EXIT)
 
             # move correct stone on upper side above correct bottom position
-            print(cp, cs.position, np.dot(cp, cs.position))
+            #print(cp, cs.position, np.dot(cp, cs.position))
             while_counter = 0
             while np.dot(cp, cs.position) != 0 and not error_endless_loop(4, get_linenumber()): #error here !!! turn of cube dis not considered in target_positions
                 self.cube.turn_side('U')
-                print(cp, cs.position, np.dot(cp, cs.position))
-            print(ws.position, np.dot(ws.position, SIDE_DIR_FRONT))
+                #print(cp, cs.position, np.dot(cp, cs.position))
+            #print(ws.position, np.dot(ws.position, SIDE_DIR_FRONT))
 
             # exchange upper/front edge with lower front edge
             while_counter = 0
             while not self.cube.stone_on_side(ws, SIDE_DIR_FRONT) and not error_endless_loop(4, get_linenumber()):
                 self.cube.turn_cube(self.cube.rotz)
                 cp = self.cube.rotz.dot(cp)  # if cube is turned then rotate as well target position for the correct stone !!!
-                print(ws.position, np.dot(ws.position, SIDE_DIR_FRONT))
+                #print(ws.position, np.dot(ws.position, SIDE_DIR_FRONT))
             for f in cs.faces:
-                print(f.color, SIDE_COL_WHITE)
+                #print(f.color, SIDE_COL_WHITE)
                 if f.color == SIDE_COL_WHITE:
-                    print(f.direction, SIDE_DIR_WHITE)
+                    #print(f.direction, SIDE_DIR_WHITE)
                     if np.dot(f.direction, SIDE_DIR_WHITE) == -1:
-                        print('LrfflR')
                         self.cube.turn_side('LrfflR')
                     else:
-                        print('ULrflR')
                         self.cube.turn_side('ULrflR')
 
         print('white edges as bottom side are correct')
@@ -423,7 +433,7 @@ class CubeSolver:
                     else:
                         error('error in solver: failed to move corner stone to front/upper side in line #', get_linenumber(), ERR_ACTION_EXIT)
                     print('correct corner stone on front/upper side')
-                    print(cp, cs.position)
+                    #print(cp, cs.position)
 
                 while_counter = 0
                 while not self.cube.is_min_corner_dist(cp, cs.position) and not error_endless_loop(4, get_linenumber()):
@@ -452,7 +462,7 @@ class CubeSolver:
                         self.cube.turn_side('lURFuuf')
                     else:
                         error('inconsistent faces of stone', get_linenumber(), ERR_ACTION_EXIT)
-                print(cp, cs.position, np.dot(cp, cs.position))
+                #print(cp, cs.position, np.dot(cp, cs.position))
 
     def build_mid_ring(self):
         mid_stones = np.array([])
@@ -462,12 +472,11 @@ class CubeSolver:
             self.cube.get_edge_stone(SIDE_COL_ORANGE, SIDE_COL_GREEN),
             self.cube.get_edge_stone(SIDE_COL_ORANGE, SIDE_COL_BLUE)])
 
-        for ms in mid_stones:
-            print('mid stone colors: ', ms.faces[0].color, ms.faces[1].color, 'correct? ', self.cube.is_stone_correct(ms))
+        #for ms in mid_stones:
+            #print('mid stone colors: ', ms.faces[0].color, ms.faces[1].color, 'correct? ', self.cube.is_stone_correct(ms))
 
         for ms in mid_stones:
-            print('mid stone colors: ', ms.faces[0].color, ms.faces[1].color, 'correct? ',
-                  self.cube.is_stone_correct(ms))
+            #print('mid stone colors: ', ms.faces[0].color, ms.faces[1].color, 'correct? ', self.cube.is_stone_correct(ms))
             if not self.cube.is_stone_correct(ms):
                 # if mid stone not on UP side, then move to UP side
                 if not self.cube.stone_on_side(ms, SIDE_DIR_UP):
@@ -484,15 +493,13 @@ class CubeSolver:
                     else:
                         error('mixed up mid stones in line ', get_linenumber(), ERR_ACTION_EXIT)
                 print('move mid stone on up side to correct side with same color')
-                print('color of face0 side:', self.cube.get_color_of_side(ms.faces[0].direction), 'color of face0: ',
-                      ms.faces[0].color)
-                print('color of face1 side:', self.cube.get_color_of_side(ms.faces[1].direction), 'color of face1: ',
-                      ms.faces[1].color)
+                #print('color of face0 side:', self.cube.get_color_of_side(ms.faces[0].direction), 'color of face0: ', ms.faces[0].color)
+                #print('color of face1 side:', self.cube.get_color_of_side(ms.faces[1].direction), 'color of face1: ', ms.faces[1].color)
                 while not ( self.cube.get_color_of_side(ms.faces[0].direction) == ms.faces[0].color or
                             self.cube.get_color_of_side(ms.faces[1].direction) == ms.faces[1].color):
                     self.cube.turn_side('U')
-                    print('color of face0 side:', self.cube.get_color_of_side(ms.faces[0].direction), 'color of face0: ', ms.faces[0].color)
-                    print('color of face1 side:', self.cube.get_color_of_side(ms.faces[1].direction), 'color of face1: ', ms.faces[1].color)
+                    #print('color of face0 side:', self.cube.get_color_of_side(ms.faces[0].direction), 'color of face0: ', ms.faces[0].color)
+                    #print('color of face1 side:', self.cube.get_color_of_side(ms.faces[1].direction), 'color of face1: ', ms.faces[1].color)
                 print('turn cube till correct mid stone is at front side')
                 while not self.cube.stone_on_side(ms, SIDE_DIR_FRONT):
                     self.cube.turn_cube(self.cube.rotz)
@@ -508,7 +515,7 @@ class CubeSolver:
 
     def build_top_edges(self):
         top_edges = np.array([])
-        num_correct_top_edges = np.array(range(4))
+        num_correct_top_edges = np.array([0,0,0,0])
         top_edges = np.append(top_edges,
                                [self.cube.get_edge_stone(SIDE_COL_YELLOW, SIDE_COL_BLUE),
                                 self.cube.get_edge_stone(SIDE_COL_YELLOW, SIDE_COL_RED),
@@ -518,10 +525,18 @@ class CubeSolver:
             num_correct_top_edges[turn] = 0
             for s in top_edges:
                 if self.cube.is_stone_pos_correct(s):
-                    num_correct_top_edges[turn] =+ 1
+                    num_correct_top_edges[turn] = num_correct_top_edges[turn] + 1
+            print('after ', turn, ' turns correct edge stones: ', np.amax(num_correct_top_edges), ' number of U-turns: ',
+                  np.argmax(num_correct_top_edges))
             self.cube.turn_side('U')
+        print('correct edge stones: ', np.amax(num_correct_top_edges), ' number of U-turns: ', np.argmax(num_correct_top_edges))
+        t.sleep(1)
 
         # if max correct top edges only one, then directly start edges switching and recount correct top edges
+        '''
+        if np.amax(num_correct_top_edges) == 1:
+            error('only one top edges is correct. this case not yet considered. line: ', get_linenumber(), ERR_ACTION_EXIT)
+        
         if np.amax(num_correct_top_edges) == 1:
             # switch top edges
             self.cube.turn_side('UFRUruf')
@@ -532,16 +547,71 @@ class CubeSolver:
                     if self.cube.is_stone_pos_correct(s):
                         num_correct_top_edges[turn] = + 1
                 self.cube.turn_side('U')
+        '''
 
         # turn UP side to position with max correct top edges
         print('turn UP side to position with max correct top edges. turns are: ', np.argmax(num_correct_top_edges))
-        for turn in range(np.argmax(num_correct_top_edges)):
+        for turn in range(np.argmax(num_correct_top_edges)): #kritisch!!! was passiert bei 0-1 = -1 ????
+            print('turn')
             self.cube.turn_side('U')
-        while not (not self.cube.is_stone_pos_correct(self.cube.get_edge_stone(SIDE_COL_YELLOW, self.cube.get_color_of_side(SIDE_DIR_FRONT))) and
-                   not self.cube.is_stone_pos_correct(self.cube.get_edge_stone(SIDE_COL_YELLOW, self.cube.get_color_of_side(SIDE_DIR_LEFT)))):
-            self.cube.turn_cube(self.cube.rotz)
-        self.cube.turn_side('UFRUruf')
+
+        t.sleep(1)
+
+        if np.amax(num_correct_top_edges) == 2:
+            print('two wrong top edges detected. fix them ...')
+            while not (self.cube.is_stone_pos_correct(self.cube.get_edge_stone(SIDE_COL_YELLOW, self.cube.get_color_of_side(SIDE_DIR_RIGHT))) and
+                not self.cube.is_stone_pos_correct(self.cube.get_edge_stone(SIDE_COL_YELLOW, self.cube.get_color_of_side(SIDE_DIR_FRONT)))) and error_endless_loop(4, get_linenumber()):
+                self.cube.turn_cube(self.cube.rotz)
+            self.cube.turn_side('UFRUruf')
+
+            # again position UP side with max correct top edges
+            num_correct_top_edges = [0,0,0,0]
+            for turn in range(4):
+                num_correct_top_edges[turn] = 0
+                for s in top_edges:
+                    if self.cube.is_stone_pos_correct(s):
+                        num_correct_top_edges[turn] = num_correct_top_edges[turn] + 1
+                print('after ', turn, ' turns correct edge stones: ', np.amax(num_correct_top_edges),
+                      ' number of U-turns: ',
+                      np.argmax(num_correct_top_edges))
+                self.cube.turn_side('U')
+            print('correct edge stones: ', np.amax(num_correct_top_edges), ' number of U-turns: ',
+                  np.argmax(num_correct_top_edges))
+
+            # turn UP side to position with max correct top edges
+            print('turn UP side to position with max correct top edges. turns are: ', np.argmax(num_correct_top_edges))
+            for turn in range(np.argmax(num_correct_top_edges)):  # kritisch!!! was passiert bei 0-1 = -1 ????
+                print('turn')
+                self.cube.turn_side('U')
+
+            # check if top edges at correct position
+            count_wrong_top_edges = 0
+            for s in top_edges:
+                if not self.cube.is_stone_pos_correct(s):
+                    count_wrong_top_edges = count_wrong_top_edges + 1
+            print('wrong top edges: ', count_wrong_top_edges)
+
+            if count_wrong_top_edges > 0:
+                turns = 0
+                while (not (self.cube.is_stone_pos_correct(self.cube.get_edge_stone(SIDE_COL_YELLOW, self.cube.get_color_of_side(SIDE_DIR_RIGHT))) and
+                    not self.cube.is_stone_pos_correct(self.cube.get_edge_stone(SIDE_COL_YELLOW, self.cube.get_color_of_side(SIDE_DIR_FRONT))))) and turns < 4:
+                    self.cube.turn_cube(self.cube.rotz)
+                    turns = turns + 1
+                self.cube.turn_side('UFRUruf')
+        elif np.amax(num_correct_top_edges) == 4:
+            # fine, nothing to do
+            print('all top edges correct. nothing to do.')
+            pass
+        else:
+            error('inconsistent number of correct top edges: ', np.amax(num_correct_top_edges), ERR_ACTION_EXIT)
+
         ##### Problem, wenn nur die gegenueberliegenden edge stones passen
+        '''
+        for s in top_edges:
+            if not self.cube.is_stone_correct():
+                while not 
+        '''
+
 def main():
     # init graphics
     #fig = plt.figure()
@@ -565,8 +635,8 @@ def main():
 
     # turn sides
     #cube.turn_side('URurufUFUUulULUFuf') #wrong mid stones
-    cube.turn_side('RBLF') #completely destroyed
-    #cube.turn_side('Rr')
+    #cube.turn_side('RBLF') #completely destroyed
+    cube.turn_side('UFRUrufUUUFRUruf')
 
     fig.show()
     fig.canvas.flush_events()
