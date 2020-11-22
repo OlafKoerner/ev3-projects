@@ -551,7 +551,7 @@ class CubeSolver:
 
         # turn UP side to position with max correct top edges
         print('turn UP side to position with max correct top edges. turns are: ', np.argmax(num_correct_top_edges))
-        for turn in range(np.argmax(num_correct_top_edges)): #kritisch!!! was passiert bei 0-1 = -1 ????
+        for turn in range(np.argmax(num_correct_top_edges)):
             print('turn')
             self.cube.turn_side('U')
 
@@ -580,7 +580,7 @@ class CubeSolver:
 
             # turn UP side to position with max correct top edges
             print('turn UP side to position with max correct top edges. turns are: ', np.argmax(num_correct_top_edges))
-            for turn in range(np.argmax(num_correct_top_edges)):  # kritisch!!! was passiert bei 0-1 = -1 ????
+            for turn in range(np.argmax(num_correct_top_edges)):
                 print('turn')
                 self.cube.turn_side('U')
 
