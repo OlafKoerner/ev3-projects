@@ -17,7 +17,7 @@ motor_b_null_pos = motor_b.position
 def down():
     print('down')
     print('first position: ', motor_a.position)
-    motor_a.run_to_abs_pos(position_sp=motor_a_null_pos+120, speed_sp=200, stop_action='hold')
+    motor_a.run_to_abs_pos(position_sp=motor_a_null_pos, speed_sp=200, stop_action='hold')
     while motor_a.is_running:
         print('position: ', motor_a.position, '   position_sp: ', motor_a.position_sp)
         sleep(0.1)
@@ -25,20 +25,33 @@ def down():
 
 
 def flip():
-    print('flip')
-    motor_a.run_to_abs_pos(position_sp=motor_a_null_pos+120, speed_sp=200, stop_action='hold')
-    while motor_a.is_running: sleep(0.1)
+    #print('motor_a_null_pos: ', motor_a_null_pos, 'motor_a.position: ', motor_a.position)
+    motor_a.run_to_abs_pos(position_sp=motor_a_null_pos+100, speed_sp=200, stop_action='hold')
+
+    while motor_a.is_running:
+        #print('position: ', motor_a.position, '   position_sp: ', motor_a.position_sp)
+        sleep(0.1)
+
     sleep(1)
-    motor_a.run_to_abs_pos(position_sp=motor_a_null_pos+180, speed_sp=200, stop_action='hold')
-    while motor_a.is_running: sleep(0.1)
+
+    motor_a.run_to_abs_pos(position_sp=motor_a_null_pos, speed_sp=200, stop_action='hold')
+
+    while motor_a.is_running:
+        #print('position: ', motor_a.position, '   position_sp: ', motor_a.position_sp)
+        sleep(0.1)
+
     sleep(1)
 
 
 def rot(x):
-    motor_b.run_to_abs_pos(position_sp=motor_b_null_pos-1120 * x, speed_sp=200, stop_action='hold')
+    motor_b.run_to_rel_pos(position_sp=-1082 * x, speed_sp=200, stop_action='hold')
+    print('pos: ', motor_b.position, 'setpoint: ', motor_b.position_sp)
     while motor_b.is_running: sleep(0.1)
     sleep(1)
-    motor_b.run_to_abs_pos(position_sp=motor_b_null_pos+(1090 * x / abs(x)), speed_sp=200, stop_action='hold')
+    motor_b.run_to_rel_pos(position_sp=-65 * x / abs(x), speed_sp=200, stop_action='hold')
+    while motor_b.is_running: sleep(0.1)
+    sleep(1)
+    motor_b.run_to_rel_pos(position_sp=+65 * x / abs(x), speed_sp=200, stop_action='hold')
     while motor_b.is_running: sleep(0.1)
     sleep(1)
 
@@ -46,7 +59,7 @@ def rot(x):
 def up():
     print('up')
     print('first position: ', motor_a.position)
-    motor_a.run_to_abs_pos(position_sp=motor_a_null_pos, speed_sp=200, stop_action='hold')
+    motor_a.run_to_abs_pos(position_sp=motor_a_null_pos-120, speed_sp=200, stop_action='hold')
     while motor_a.is_running:
         print('position: ', motor_a.position, '   position_sp: ', motor_a.position_sp)
         sleep(0.1)
@@ -195,7 +208,7 @@ def turn_sides(cmd):
 
 
 def main(args):
-    btn = ev3.Button()
+    #btn = ev3.Button()
 
     # Connect color sensors
     # cs = ColorSensor()
@@ -211,7 +224,8 @@ def main(args):
     fBrown = 7
 
     print('Robot Starting')
-    ev3.Sound.speak('Okay folks... Let us solve the cube!').wait()
+    #ev3.Sound.speak('Okay folks... Let us solve the cube!').wait()
+    ev3.Sound.speak('Okay cube!').wait()
     print('Motor start turning...')
 
     # turn_side('DdRrUu')
@@ -222,7 +236,12 @@ def main(args):
     # turn_U()
     # turn_u()
 
-    rot(0.25)
+    rot(1)
+    #up()
+    #sleep(2)
+    #down()
+    #flip()
+    #sleep(2)
 
 
     # for cmd in args:
@@ -231,4 +250,4 @@ def main(args):
     motor_a.stop(stop_action="coast")
     motor_b.stop(stop_action="coast")
 
-    ev3.Sound.speak('Cube is solved!').wait()
+   # ev3.Sound.speak('Cube is solved!').wait()
