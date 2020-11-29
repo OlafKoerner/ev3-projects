@@ -12,6 +12,10 @@ motor_b = ev3.Motor(ev3.OUTPUT_B)
 #assert motor_b.connected
 if motor_b.connected: motor_b_null_pos = motor_b.position
 
+motor_c = ev3.Motor(ev3.OUTPUT_C)
+assert motor_c.connected
+if motor_c.connected: motor_c_null_pos = motor_c.position
+
 # definition of motor moves
 def down():
     if motor_a.connected:
@@ -175,8 +179,8 @@ def main(args):
     #btn = ev3.Button()
 
     # Connect color sensors
-    # cs = ColorSensor()
-    # assert cs.connected
+    cs = ev3.ColorSensor(ev3.INPUT_1)
+    assert cs.connected
     
    
     fNoColor = 0
@@ -194,10 +198,20 @@ def main(args):
     print('Motor start turning...')
 
 
-    rot(0.25)
+    #rot(0.25)
+    #up()
+
+    motor_a.stop(stop_action="coast")
+    motor_b.stop(stop_action="coast")
+    motor_c.stop(stop_action="coast")
+
+    while 1:
+        print('postion motor c: ', motor_c.position - motor_c_null_pos)
+        print('color: ', cs.red, ' ', cs.green, ' ', cs.blue)
 
 
     motor_a.stop(stop_action="coast")
     motor_b.stop(stop_action="coast")
+    motor_c.stop(stop_action="coast")
 
    # ev3.Sound.speak('Cube is solved!').wait()
