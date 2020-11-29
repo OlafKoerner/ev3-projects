@@ -11,8 +11,8 @@ import math as m
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection, Line3DCollection
 import time as t
-
 from inspect import currentframe
+import magiccube_device as mcd
 
 
 ERR_ACTION_EXIT = 1
@@ -216,6 +216,115 @@ class Cube:
         for s in self.stones:
             s.draw(self.subplot)
 
+    # switcher functions
+    def turn_R(self):
+        for s in self.stones_side(SIDE_DIR_RIGHT):
+                    s.rotate(self.roty_)
+        mcd.turn_R()
+        return
+
+    def turn_r(self):
+        for s in self.stones_side(SIDE_DIR_RIGHT):
+            s.rotate(self.roty)
+        mcd.turn_r()
+        return
+
+    def turn_L(self):
+        for s in self.stones_side(SIDE_DIR_LEFT):
+            s.rotate(self.roty)
+        mcd.turn_L()
+        return
+
+    def turn_l(self):
+        for s in self.stones_side(SIDE_DIR_LEFT):
+            s.rotate(self.roty_)
+        mcd.turn_l()
+        return
+
+    def turn_U(self):
+        for s in self.stones_side(SIDE_DIR_UP):
+            s.rotate(self.rotz)
+        mcd.turn_U()
+
+    def turn_u(self):
+        for s in self.stones_side(SIDE_DIR_UP):
+            s.rotate(self.rotz_)
+        mcd.turn_u()
+        return
+
+    def turn_D(self):
+        for s in self.stones_side(SIDE_DIR_DOWN):
+            s.rotate(self.rotz)
+        mcd.turn_D()
+        return
+
+    def turn_d(self):
+        for s in self.stones_side(SIDE_DIR_DOWN):
+            s.rotate(self.rotz_)
+        mcd.turn_d()
+        return
+
+    def turn_F(self):
+        for s in self.stones_side(SIDE_DIR_FRONT):
+            s.rotate(self.rotx)
+        mcd.turn_F()
+        return
+
+    def turn_f(self):
+        for s in self.stones_side(SIDE_DIR_FRONT):
+            s.rotate(self.rotx_)
+        mcd.turn_f()
+        return
+
+    def turn_B(self):
+        for s in self.stones_side(SIDE_DIR_BACK):
+            s.rotate(self.rotx)
+        mcd.turn_B()
+        return
+
+    def turn_b(self):
+        for s in self.stones_side(SIDE_DIR_BACK):
+            s.rotate(self.rotx_)
+        mcd.turn_b()
+        return
+
+    def turn_C(self):
+        for s in self.stones:
+            s.rotate(self.rotz)
+        mcd.turn_C()
+        return
+
+    def turn_c(self):
+        for s in self.stones:
+            s.rotate(self.rotz_)
+        mcd.turn_c()
+        return
+
+    def turn_side(self, cmd):
+        switcher = {
+            'R': self.turn_R,
+            'r': self.turn_r,
+            'L': self.turn_L,
+            'l': self.turn_l,
+            'F': self.turn_F,
+            'f': self.turn_f,
+            'B': self.turn_B,
+            'b': self.turn_b,
+            'U': self.turn_U,
+            'u': self.turn_u,
+            'D': self.turn_D,
+            'd': self.turn_d,
+            'C': self.turn_C,
+            'c': self.turn_c
+        }
+        for chr in cmd:
+            func = switcher.get(chr, lambda: "")
+            func()
+            self.draw()
+            fig.show()
+            fig.canvas.flush_events()
+            t.sleep(1)
+    '''
     def turn_side(self, turn_dir):
         # 'R' turn right side clockwise
         # 'L' turn left side clockwise
@@ -265,14 +374,9 @@ class Cube:
             fig.show()
             fig.canvas.flush_events()
             t.sleep(1)
+    '''
 
-    def turn_cube(self, rot_mat):
-        for s in self.stones:
-            s.rotate(rot_mat)
-        self.draw()
-        fig.show()
-        fig.canvas.flush_events()
-        t.sleep(1)
+
     '''
     def is_stone_pos_correct(self, s):
         stone_colors = np.array([])
@@ -372,7 +476,7 @@ class CubeSolver:
                 # turn cube till correct stone is on front side
                 while_counter = 0
                 while not self.cube.stone_on_side(cs, SIDE_DIR_FRONT) and not error_endless_loop(4, get_linenumber()):
-                    self.cube.turn_cube(self.cube.rotz)
+                    self.cube.turn_side('C')
                     cp = self.cube.rotz.dot(cp)  # if cube is turned then rotate as well target position for the correct stone !!!
                 # move correct stone to yellow/upper side and front side
                 if self.cube.stone_on_side(cs, SIDE_DIR_LEFT):
@@ -394,7 +498,7 @@ class CubeSolver:
             # exchange upper/front edge with lower front edge
             while_counter = 0
             while not self.cube.stone_on_side(ws, SIDE_DIR_FRONT) and not error_endless_loop(4, get_linenumber()):
-                self.cube.turn_cube(self.cube.rotz)
+                self.cube.turn_side('C')
                 cp = self.cube.rotz.dot(cp)  # if cube is turned then rotate as well target position for the correct stone !!!
                 #print(ws.position, np.dot(ws.position, SIDE_DIR_FRONT))
             for f in cs.faces:
@@ -420,7 +524,7 @@ class CubeSolver:
                 # ensure correct stone is on front side
                 while_counter = 0
                 while not self.cube.stone_on_side(cs, SIDE_DIR_FRONT) and not error_endless_loop(4, get_linenumber()):
-                    self.cube.turn_cube(self.cube.rotz)
+                    self.cube.turn_side('C')
                     cp = self.cube.rotz.dot(cp)  # if cube is turned then rotate as well target position for the correct stone !!!
                 print('correct corner on front-side')
 
@@ -440,7 +544,7 @@ class CubeSolver:
                     self.cube.turn_side('U')
                 while_counter = 0
                 while not self.cube.stone_on_side(cs, SIDE_DIR_FRONT) and not error_endless_loop(4, get_linenumber()):
-                    self.cube.turn_cube(self.cube.rotz)
+                    self.cube.turn_side('C')
                     cp = self.cube.rotz.dot(cp)  # if cube is turned then rotate as well target position for the correct stone !!!
                 if self.cube.stone_on_side(cs, SIDE_DIR_RIGHT):
                     # move right corner stone to white bottom side
@@ -483,7 +587,7 @@ class CubeSolver:
                     # ensure that mid stone is on front side
                     print('move mid stone to front')
                     while not self.cube.stone_on_side(ms, SIDE_DIR_FRONT):
-                        self.cube.turn_cube(self.cube.rotz)
+                        self.cube.turn_side('C')
                     # move mid stone to UP side
                     print('move mid stone to up side')
                     if self.cube.stone_on_side(ms, SIDE_DIR_RIGHT):
@@ -502,7 +606,7 @@ class CubeSolver:
                     #print('color of face1 side:', self.cube.get_color_of_side(ms.faces[1].direction), 'color of face1: ', ms.faces[1].color)
                 print('turn cube till correct mid stone is at front side')
                 while not self.cube.stone_on_side(ms, SIDE_DIR_FRONT):
-                    self.cube.turn_cube(self.cube.rotz)
+                    self.cube.turn_side('C')
                 print('insert mid stone to correct position')
                 if (ms.faces[0].color == self.cube.get_color_of_side(SIDE_DIR_RIGHT) or
                     ms.faces[1].color == self.cube.get_color_of_side(SIDE_DIR_RIGHT)):
@@ -561,7 +665,7 @@ class CubeSolver:
             print('two wrong top edges detected. fix them ...')
             while not (self.cube.is_stone_pos_correct(self.cube.get_edge_stone(SIDE_COL_YELLOW, self.cube.get_color_of_side(SIDE_DIR_RIGHT))) and
                 not self.cube.is_stone_pos_correct(self.cube.get_edge_stone(SIDE_COL_YELLOW, self.cube.get_color_of_side(SIDE_DIR_FRONT)))) and error_endless_loop(4, get_linenumber()):
-                self.cube.turn_cube(self.cube.rotz)
+                self.cube.turn_side('C')
             self.cube.turn_side('UFRUruf')
 
             # again position UP side with max correct top edges
@@ -595,7 +699,7 @@ class CubeSolver:
                 turns = 0
                 while (not (self.cube.is_stone_pos_correct(self.cube.get_edge_stone(SIDE_COL_YELLOW, self.cube.get_color_of_side(SIDE_DIR_RIGHT))) and
                     not self.cube.is_stone_pos_correct(self.cube.get_edge_stone(SIDE_COL_YELLOW, self.cube.get_color_of_side(SIDE_DIR_FRONT))))) and turns < 4:
-                    self.cube.turn_cube(self.cube.rotz)
+                    self.cube.turn_side('C')
                     turns = turns + 1
                 self.cube.turn_side('UFRUruf')
         elif np.amax(num_correct_top_edges) == 4:
@@ -630,13 +734,20 @@ def main():
     # init cube
     cube = Cube(ax)
     #plt.show(block=False)
-    #cube.turn_cube(cube.roty_)
     fig.show()
+
+    print('Robot Starting')
+    # ev3.Sound.speak('Okay folks... Let us solve the cube!').wait()
+    #mcd.ev3.Sound.speak('Okay cube!').wait()
+    print('Motor start turning...')
+
+
 
     # turn sides
     #cube.turn_side('URurufUFUUulULUFuf') #wrong mid stones
     #cube.turn_side('RBLF') #completely destroyed
-    cube.turn_side('UFRUrufUUUFRUruf')
+    #cube.turn_side('UFRUrufUUUFRUruf')
+    cube.turn_side('U')
 
     fig.show()
     fig.canvas.flush_events()
@@ -654,8 +765,13 @@ def main():
 
     while 1:
         t.sleep(0.5)
-        cube.turn_cube(cube.rotz)
+        cube.turn_side('C')
     #t.sleep(5)
+
+    motor_a.stop(stop_action="coast")
+    motor_b.stop(stop_action="coast")
+
+    # ev3.Sound.speak('Cube is solved!').wait()
 
 
 if __name__ == "__main__":

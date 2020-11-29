@@ -5,142 +5,136 @@ from time import sleep
 
 # connect motors to output ports
 motor_a = ev3.Motor(ev3.OUTPUT_A)
-assert motor_a.connected
-motor_a_null_pos = motor_a.position
+#assert motor_a.connected
+if motor_a.connected: motor_a_null_pos = motor_a.position
 
 motor_b = ev3.Motor(ev3.OUTPUT_B)
-assert motor_b.connected
-motor_b_null_pos = motor_b.position
-
+#assert motor_b.connected
+if motor_b.connected: motor_b_null_pos = motor_b.position
 
 # definition of motor moves
 def down():
-    print('down')
-    print('first position: ', motor_a.position)
-    motor_a.run_to_abs_pos(position_sp=motor_a_null_pos, speed_sp=200, stop_action='hold')
-    while motor_a.is_running:
-        print('position: ', motor_a.position, '   position_sp: ', motor_a.position_sp)
-        sleep(0.1)
-    sleep(1)
-
+    if motor_a.connected:
+        motor_a.run_to_abs_pos(position_sp=motor_a_null_pos, speed_sp=200, stop_action='hold')
+        while motor_a.is_running:
+            sleep(0.1)
 
 def flip():
-    #print('motor_a_null_pos: ', motor_a_null_pos, 'motor_a.position: ', motor_a.position)
-    motor_a.run_to_abs_pos(position_sp=motor_a_null_pos+100, speed_sp=200, stop_action='hold')
-
-    while motor_a.is_running:
-        #print('position: ', motor_a.position, '   position_sp: ', motor_a.position_sp)
-        sleep(0.1)
-
-    sleep(1)
-
-    motor_a.run_to_abs_pos(position_sp=motor_a_null_pos, speed_sp=200, stop_action='hold')
-
-    while motor_a.is_running:
-        #print('position: ', motor_a.position, '   position_sp: ', motor_a.position_sp)
-        sleep(0.1)
-
-    sleep(1)
-
+    if motor_a.connected:
+        motor_a.run_to_abs_pos(position_sp=motor_a_null_pos+100, speed_sp=200, stop_action='hold')
+        while motor_a.is_running:
+            sleep(0.1)
+        motor_a.run_to_abs_pos(position_sp=motor_a_null_pos, speed_sp=200, stop_action='hold')
+        while motor_a.is_running:
+            sleep(0.1)
 
 def rot(x):
-    motor_b.run_to_rel_pos(position_sp=-1082 * x, speed_sp=200, stop_action='hold')
-    print('pos: ', motor_b.position, 'setpoint: ', motor_b.position_sp)
-    while motor_b.is_running: sleep(0.1)
-    sleep(1)
-    motor_b.run_to_rel_pos(position_sp=-65 * x / abs(x), speed_sp=200, stop_action='hold')
-    while motor_b.is_running: sleep(0.1)
-    sleep(1)
-    motor_b.run_to_rel_pos(position_sp=+65 * x / abs(x), speed_sp=200, stop_action='hold')
-    while motor_b.is_running: sleep(0.1)
-    sleep(1)
-
+    if motor_b.connected:
+        motor_b.run_to_rel_pos(position_sp=-1082 * x, speed_sp=200, stop_action='hold')
+        while motor_b.is_running: sleep(0.1)
+        motor_b.run_to_rel_pos(position_sp=-65 * x / abs(x), speed_sp=200, stop_action='hold')
+        while motor_b.is_running: sleep(0.1)
+        motor_b.run_to_rel_pos(position_sp=+65 * x / abs(x), speed_sp=200, stop_action='hold')
+        while motor_b.is_running: sleep(0.1)
 
 def up():
-    print('up')
-    print('first position: ', motor_a.position)
-    motor_a.run_to_abs_pos(position_sp=motor_a_null_pos-120, speed_sp=200, stop_action='hold')
-    while motor_a.is_running:
-        print('position: ', motor_a.position, '   position_sp: ', motor_a.position_sp)
-        sleep(0.1)
-    sleep(1)
-
+    if motor_a.connected:
+        motor_a.run_to_abs_pos(position_sp=motor_a_null_pos-100, speed_sp=200, stop_action='hold')
+        while motor_a.is_running:
+            sleep(0.1)
 
 # definition of turns
+# 'R' turn right side clockwise
+# 'L' turn left side clockwise
+# 'F' turn front side clockwise
+# 'B' turn back side clockwise
+# 'U' turn up side clockwise
+# 'D' turn down clockwise
+# lower case letter means counter clockwise turn
 def turn_R():
-    rot(0.25)
+    up()
+    rot(-0.25)
     down()
     flip()
     rot(0.25)
     flip()
     up()
-    rot(0.25)
-
+    rot(-0.25)
+    flip()
+    flip()
 
 def turn_r():
-    rot(0.25)
+    up()
+    rot(-0.25)
     down()
     flip()
     rot(-0.25)
     flip()
     up()
-    rot(0.25)
-
+    rot(-0.25)
+    flip()
+    flip()
 
 def turn_L():
-    rot(-0.25)
+    up()
+    rot(0.25)
     down()
     flip()
     rot(0.25)
+    flip()
+    flip()
     flip()
     up()
     rot(-0.25)
 
 
 def turn_l():
-    rot(-0.25)
+    up()
+    rot(0.25)
     down()
     flip()
     rot(-0.25)
+    flip()
+    flip()
     flip()
     up()
     rot(-0.25)
 
 
 def turn_F():
-    rot(0.5)
     down()
     flip()
     rot(0.25)
     flip()
-    up()
+    flip()
+    flip()
 
 
 def turn_f():
-    rot(0.5)
     down()
     flip()
     rot(-0.25)
     flip()
-    up()
+    flip()
+    flip()
 
 
 def turn_B():
     down()
     flip()
+    flip()
+    flip()
     rot(0.25)
     flip()
-    up()
-    rot(0.5)
 
 
 def turn_b():
     down()
     flip()
+    flip()
+    flip()
     rot(-0.25)
     flip()
-    up()
-    rot(0.5)
 
 
 def turn_U():
@@ -150,7 +144,6 @@ def turn_U():
     rot(0.25)
     flip()
     flip()
-    up()
 
 
 def turn_u():
@@ -160,51 +153,22 @@ def turn_u():
     rot(-0.25)
     flip()
     flip()
-    up()
-
 
 def turn_D():
     down()
     rot(0.25)
-    up()
-
 
 def turn_d():
     down()
     rot(-0.25)
+
+def turn_C():
     up()
+    rot(0.25)
 
-    # 'R' turn right side clockwise
-    # 'L' turn left side clockwise
-    # 'F' turn front side clockwise
-    # 'B' turn back side clockwise
-    # 'U' turn up side clockwise
-    # 'D' turn down clockwise
-    # lower case letter means counter clockwise turn
-
-
-"""
-switcher = {
-    'R': turn_R(),
-    'r': turn_r(),
-    'L': turn_L(),
-    'l': turn_l(),
-    'F': turn_F(),
-    'f': turn_f(),
-    'B': turn_B(),
-    'b': turn_b(),
-    'U': turn_U(),
-    'u': turn_u(),
-    'D': turn_D(),
-    'd': turn_d()
-}
-"""
-
-
-def turn_sides(cmd):
-    for chr in cmd:
-        func = switcher.get(chr)
-        func()
+def turn_c():
+    up()
+    rot(-0.25)
 
 
 def main(args):
@@ -213,7 +177,8 @@ def main(args):
     # Connect color sensors
     # cs = ColorSensor()
     # assert cs.connected
-
+    
+   
     fNoColor = 0
     fBlack = 1
     fBlue = 2
@@ -228,24 +193,9 @@ def main(args):
     ev3.Sound.speak('Okay cube!').wait()
     print('Motor start turning...')
 
-    # turn_side('DdRrUu')
-    #turn_D()
-    # turn_d()
-    # turn_R()
-    # turn_r()
-    # turn_U()
-    # turn_u()
 
-    rot(1)
-    #up()
-    #sleep(2)
-    #down()
-    #flip()
-    #sleep(2)
+    rot(0.25)
 
-
-    # for cmd in args:
-    #   turn_side(cmd)
 
     motor_a.stop(stop_action="coast")
     motor_b.stop(stop_action="coast")
