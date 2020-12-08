@@ -1,18 +1,21 @@
+
+from magiccube.magiccube_main import RUN_ON_EV3
 #import msvcrt as ms
 import numpy as np
-import matplotlib
-matplotlib.use('TkAgg')
-import matplotlib.pyplot as plt
-import matplotlib
-import platform
-#if platform.system() == 'Darwin':
-#    matplotlib.use('MacOSX')
-import math as m
-from mpl_toolkits.mplot3d import Axes3D
-from mpl_toolkits.mplot3d.art3d import Poly3DCollection, Line3DCollection
+if not RUN_ON_EV3:
+    import matplotlib
+    matplotlib.use('TkAgg')
+    import matplotlib.pyplot as plt
+    #import platform
+    #if platform.system() == 'Darwin':
+    #   matplotlib.use('MacOSX')
+    from mpl_toolkits.mplot3d import Axes3D
+    from mpl_toolkits.mplot3d.art3d import Poly3DCollection, Line3DCollection
+
 import time as t
 from inspect import currentframe
 import magiccube_device as mcd
+
 
 
 ERR_ACTION_EXIT = 1
@@ -60,14 +63,16 @@ def error_endless_loop(max, lineno):
     else:
         error('error: endless loop in line #', lineno, ERR_ACTION_EXIT)
 
-fig = plt.figure()
+if not RUN_ON_EV3:
+    fig = plt.figure()
 
 class Face:
 
     def __init__(self, initdir, initcol):
         self.direction = initdir
         self.color = initcol
-        self.poly_3d_collection = 0
+        if not RUN_ON_EV3:
+            self.poly_3d_collection = 0
 
     def calc_verts(self, pos):
         if self.direction[0] != 0: return [
@@ -112,13 +117,14 @@ class Stone:
         for f in self.faces:
             verts = [f.calc_verts(self.position)]
 
-            if f.poly_3d_collection == 0:
-                f.poly_3d_collection = Poly3DCollection(
-                    verts, linewidths=1, edgecolors='k', facecolor=f.color, alpha=1)
-                ax.add_collection3d(f.poly_3d_collection)
-            # ax.scatter(self.position[0], self.position[1], self.position[2])
-            else:
-                f.poly_3d_collection.set_verts(verts)
+            if not RUN_ON_EV3:
+                if f.poly_3d_collection == 0:
+                    f.poly_3d_collection = Poly3DCollection(
+                        verts, linewidths=1, edgecolors='k', facecolor=f.color, alpha=1)
+                    ax.add_collection3d(f.poly_3d_collection)
+                # ax.scatter(self.position[0], self.position[1], self.position[2])
+                else:
+                    f.poly_3d_collection.set_verts(verts)
 
     def rotate(self, rot_mat):
         self.position = rot_mat.dot(self.position)
@@ -320,9 +326,10 @@ class Cube:
         for chr in cmd:
             func = switcher.get(chr, lambda: "")
             func()
-            self.draw()
-            fig.show()
-            fig.canvas.flush_events()
+            if not RUN_ON_EV3:
+                self.draw()
+                fig.show()
+                fig.canvas.flush_events()
             t.sleep(1)
     '''
     def turn_side(self, turn_dir):
@@ -717,40 +724,42 @@ class CubeSolver:
         '''
 
 def main():
-    # init graphics
-    #fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-    ax.set_xlim(-2, 2)
-    ax.set_ylim(-2, 2)
-    ax.set_zlim(-2, 2)
-    ax.azim = 10
-    ax.elev = 20
-    ax.plot([0, 3], [0, 0], [0, 0], '--k', color='b', linewidth=3)
-    ax.plot([0, 0], [0, 3], [0, 0], '--k', color='r', linewidth=3)
-    ax.plot([0, 0], [0, 0], [0, 3], '--k', color='y', linewidth=3)
-    ax.azim = 10
-    ax.elev = -40
+    if not RUN_ON_EV3:
+        # init graphics
+        #fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        ax.set_xlim(-2, 2)
+        ax.set_ylim(-2, 2)
+        ax.set_zlim(-2, 2)
+        ax.azim = 10
+        ax.elev = 20
+        ax.plot([0, 3], [0, 0], [0, 0], '--k', color='b', linewidth=3)
+        ax.plot([0, 0], [0, 3], [0, 0], '--k', color='r', linewidth=3)
+        ax.plot([0, 0], [0, 0], [0, 3], '--k', color='y', linewidth=3)
+        ax.azim = 10
+        ax.elev = -40
 
     # init cube
     cube = Cube(ax)
-    #plt.show(block=False)
-    fig.show()
+    if not RUN_ON_EV3:
+        #plt.show(block=False)
+        fig.show()
 
-    print('Robot Starting')
-    # ev3.Sound.speak('Okay folks... Let us solve the cube!').wait()
-    #mcd.ev3.Sound.speak('Okay cube!').wait()
-    print('Motor start turning...')
-
-
+    if RUN_ON_EV3:
+        print('Robot Starting')
+        # ev3.Sound.speak('Okay folks... Let us solve the cube!').wait()
+        mcd.ev3.Sound.speak('Okay cube!').wait()
+        print('Motor start turning...')
 
     # turn sides
-    #cube.turn_side('URurufUFUUulULUFuf') #wrong mid stones
+    cube.turn_side('URurufUFUUulULUFuf') #wrong mid stones
     #cube.turn_side('RBLF') #completely destroyed
     #cube.turn_side('UFRUrufUUUFRUruf')
-    cube.turn_side('U')
+    #cube.turn_side('U')
 
-    fig.show()
-    fig.canvas.flush_events()
+    if not RUN_ON_EV3:
+        fig.show()
+        fig.canvas.flush_events()
 
     t.sleep(1)
 
@@ -758,8 +767,10 @@ def main():
     cube_solver.build_down_side()
     cube_solver.build_mid_ring()
     cube_solver.build_top_edges()
-    fig.show()
-    fig.canvas.flush_events()
+
+    if not RUN_ON_EV3:
+        fig.show()
+        fig.canvas.flush_events()
 
     print('end')
 
@@ -768,10 +779,10 @@ def main():
         cube.turn_side('C')
     #t.sleep(5)
 
-    motor_a.stop(stop_action="coast")
-    motor_b.stop(stop_action="coast")
-
-    # ev3.Sound.speak('Cube is solved!').wait()
+    if RUN_ON_EV3:
+        motor_a.stop(stop_action="coast")
+        motor_b.stop(stop_action="coast")
+        #ev3.Sound.speak('Cube is solved!').wait()
 
 
 if __name__ == "__main__":

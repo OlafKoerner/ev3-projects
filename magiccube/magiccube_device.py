@@ -4,48 +4,55 @@ import ev3dev.ev3 as ev3
 from time import sleep
 
 # connect motors to output ports
-motor_a = ev3.Motor(ev3.OUTPUT_A)
-#assert motor_a.connected
-if motor_a.connected: motor_a_null_pos = motor_a.position
+from magiccube.magiccube_main import RUN_ON_EV3
 
-motor_b = ev3.Motor(ev3.OUTPUT_B)
-#assert motor_b.connected
-if motor_b.connected: motor_b_null_pos = motor_b.position
+if RUN_ON_EV3:
+    motor_a = ev3.Motor(ev3.OUTPUT_A)
+    assert motor_a.connected
+    if motor_a.connected: motor_a_null_pos = motor_a.position
 
-motor_c = ev3.Motor(ev3.OUTPUT_C)
-assert motor_c.connected
-if motor_c.connected: motor_c_null_pos = motor_c.position
+    motor_b = ev3.Motor(ev3.OUTPUT_B)
+    assert motor_b.connected
+    if motor_b.connected: motor_b_null_pos = motor_b.position
+
+    motor_c = ev3.Motor(ev3.OUTPUT_C)
+    #assert motor_c.connected
+    if motor_c.connected: motor_c_null_pos = motor_c.position
 
 # definition of motor moves
 def down():
-    if motor_a.connected:
-        motor_a.run_to_abs_pos(position_sp=motor_a_null_pos, speed_sp=200, stop_action='hold')
-        while motor_a.is_running:
-            sleep(0.1)
+    if RUN_ON_EV3:
+        if motor_a.connected:
+            motor_a.run_to_abs_pos(position_sp=motor_a_null_pos, speed_sp=200, stop_action='hold')
+            while motor_a.is_running:
+                sleep(0.1)
 
 def flip():
-    if motor_a.connected:
-        motor_a.run_to_abs_pos(position_sp=motor_a_null_pos+100, speed_sp=200, stop_action='hold')
-        while motor_a.is_running:
-            sleep(0.1)
-        motor_a.run_to_abs_pos(position_sp=motor_a_null_pos, speed_sp=200, stop_action='hold')
-        while motor_a.is_running:
-            sleep(0.1)
+    if RUN_ON_EV3:
+        if motor_a.connected:
+            motor_a.run_to_abs_pos(position_sp=motor_a_null_pos+100, speed_sp=200, stop_action='hold')
+            while motor_a.is_running:
+                sleep(0.1)
+            motor_a.run_to_abs_pos(position_sp=motor_a_null_pos, speed_sp=200, stop_action='hold')
+            while motor_a.is_running:
+                sleep(0.1)
 
 def rot(x):
-    if motor_b.connected:
-        motor_b.run_to_rel_pos(position_sp=-1082 * x, speed_sp=200, stop_action='hold')
-        while motor_b.is_running: sleep(0.1)
-        motor_b.run_to_rel_pos(position_sp=-65 * x / abs(x), speed_sp=200, stop_action='hold')
-        while motor_b.is_running: sleep(0.1)
-        motor_b.run_to_rel_pos(position_sp=+65 * x / abs(x), speed_sp=200, stop_action='hold')
-        while motor_b.is_running: sleep(0.1)
+    if RUN_ON_EV3:
+        if motor_b.connected:
+            motor_b.run_to_rel_pos(position_sp=-1082 * x, speed_sp=200, stop_action='hold')
+            while motor_b.is_running: sleep(0.1)
+            motor_b.run_to_rel_pos(position_sp=-65 * x / abs(x), speed_sp=200, stop_action='hold')
+            while motor_b.is_running: sleep(0.1)
+            motor_b.run_to_rel_pos(position_sp=+65 * x / abs(x), speed_sp=200, stop_action='hold')
+            while motor_b.is_running: sleep(0.1)
 
 def up():
-    if motor_a.connected:
-        motor_a.run_to_abs_pos(position_sp=motor_a_null_pos-100, speed_sp=200, stop_action='hold')
-        while motor_a.is_running:
-            sleep(0.1)
+    if RUN_ON_EV3:
+        if motor_a.connected:
+            motor_a.run_to_abs_pos(position_sp=motor_a_null_pos-100, speed_sp=200, stop_action='hold')
+            while motor_a.is_running:
+                sleep(0.1)
 
 # definition of turns
 # 'R' turn right side clockwise
@@ -180,7 +187,7 @@ def main(args):
 
     # Connect color sensors
     cs = ev3.ColorSensor(ev3.INPUT_1)
-    assert cs.connected
+#    assert cs.connected
     
    
     fNoColor = 0
@@ -194,24 +201,26 @@ def main(args):
 
     print('Robot Starting')
     #ev3.Sound.speak('Okay folks... Let us solve the cube!').wait()
-    ev3.Sound.speak('Okay cube!').wait()
-    print('Motor start turning...')
+    if RUN_ON_EV3:
+        ev3.Sound.speak('Okay cube!').wait()
+        print('Motor start turning...')
 
 
     #rot(0.25)
     #up()
 
-    motor_a.stop(stop_action="coast")
-    motor_b.stop(stop_action="coast")
-    motor_c.stop(stop_action="coast")
+    if RUN_ON_EV3:
+        motor_a.stop(stop_action="coast")
+        motor_b.stop(stop_action="coast")
+        motor_c.stop(stop_action="coast")
 
-    while 1:
-        print('postion motor c: ', motor_c.position - motor_c_null_pos)
-        print('color: ', cs.red, ' ', cs.green, ' ', cs.blue)
+        while 1:
+            print('postion motor c: ', motor_c.position - motor_c_null_pos)
+            print('color: ', cs.red, ' ', cs.green, ' ', cs.blue)
 
 
-    motor_a.stop(stop_action="coast")
-    motor_b.stop(stop_action="coast")
-    motor_c.stop(stop_action="coast")
+        motor_a.stop(stop_action="coast")
+        motor_b.stop(stop_action="coast")
+        motor_c.stop(stop_action="coast")
 
    # ev3.Sound.speak('Cube is solved!').wait()
