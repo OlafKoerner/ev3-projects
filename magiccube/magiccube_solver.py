@@ -765,8 +765,9 @@ def main():
         print('Motor start turning...')
 
     # turn sides
-    #cube.turn_side('URurufUFUUulULUFuf') #wrong mid stones
-    cube.turn_side('RBLF') #completely destroyed
+    #cube.turn_side('URurufUFUUulULUFuf') #wrong mid stones --> solved !!
+    #cube.turn_side('RBLF') #completely destroyed --> solved !!
+    cube.turn_side('RBLFURBLF')  # completely destroyed --> NOT solved !! Problem at: "move mid stone to front"
     #cube.turn_side('UFRUrufUUUFRUruf')
     #cube.turn_side('U')
 
