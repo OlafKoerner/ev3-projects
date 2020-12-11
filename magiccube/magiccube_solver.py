@@ -714,6 +714,7 @@ class CubeSolver:
         else:
             error('inconsistent position of top corners. Check line ', get_linenumber(), ERR_ACTION_EXIT)
 
+        # correct orientation of top corners
         runs = 0
         turns = 0
         for s in top_corners:
@@ -724,10 +725,12 @@ class CubeSolver:
                     else:
                         turns = turns + 1
                         self.cube.turn_side('U')
+                print('flip top corner...')
                 runs = runs + 1
                 self.cube.turn_side('RfrFRfrF')
 
                 if runs == 3:
+                    print('unwind top side')
                     for i in range(turns):
                         self.cube.turn_side('u')
                     runs = 0
