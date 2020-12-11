@@ -730,7 +730,7 @@ class CubeSolver:
                 self.cube.turn_side('RfrFRfrF')
 
                 if runs == 3:
-                    print('unwind top side')
+                    print('unwind top side!')
                     for i in range(turns):
                         self.cube.turn_side('u')
                     runs = 0
