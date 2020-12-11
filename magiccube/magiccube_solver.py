@@ -260,13 +260,13 @@ class Cube:
 
     def turn_D(self):
         for s in self.stones_side(SIDE_DIR_DOWN):
-            s.rotate(self.rotz)
+            s.rotate(self.rotz_)
         mcd.turn_D()
         return
 
     def turn_d(self):
         for s in self.stones_side(SIDE_DIR_DOWN):
-            s.rotate(self.rotz_)
+            s.rotate(self.rotz)
         mcd.turn_d()
         return
 
@@ -647,13 +647,91 @@ class CubeSolver:
             pass
         else:
             error('inconsistent number of correct top edges: ', np.amax(num_correct_top_edges), ERR_ACTION_EXIT)
-
-        ##### Problem, wenn nur die gegenueberliegenden edge stones passen
-        '''
+        print('check top edge orientation...')
+        top_edges_to_flip = np.array([])
         for s in top_edges:
-            if not self.cube.is_stone_correct():
-                while not 
-        '''
+            if not self.cube.is_stone_correct(s):
+                top_edges_to_flip = np.append(top_edges_to_flip, s)
+        for s in top_edges_to_flip:
+            print('wrong top edge orientation found')
+            # turn up side till top edge to flip is on right side
+            print('turn up side till top edge to flip is on right side')
+            while not self.cube.stone_on_side(s, SIDE_DIR_RIGHT):
+                self.cube.turn_side('U')
+            print('flip the top edge on the right side...')
+            self.cube.turn_side('RdUcRdUcRdUcRdUc')
+        # turn up side till top_edges are at their place
+        print('turn up side till top_edges are at their place...')
+        while not self.cube.is_stone_correct(top_edges[0]):
+            self.cube.turn_side('U')
+
+    def build_top_corners(self):
+        top_corners = np.array([])
+        top_corners = np.append(top_corners,
+                              [self.cube.get_corner_stone(SIDE_COL_YELLOW, SIDE_COL_BLUE,   SIDE_COL_RED),
+                               self.cube.get_corner_stone(SIDE_COL_YELLOW, SIDE_COL_BLUE,   SIDE_COL_ORANGE),
+                               self.cube.get_corner_stone(SIDE_COL_YELLOW, SIDE_COL_RED,    SIDE_COL_GREEN),
+                               self.cube.get_corner_stone(SIDE_COL_YELLOW, SIDE_COL_ORANGE, SIDE_COL_GREEN)])
+
+        # count top corners at correct position
+        top_corners_on_correct_pos = np.array([])
+        for s in top_corners:
+            if self.cube.is_stone_pos_correct(s):
+                top_corners_on_correct_pos = np.append(top_corners_on_correct_pos, s)
+        print('number of top corners at correct position: ', top_corners_on_correct_pos.size)
+
+        if top_corners_on_correct_pos.size == 0:
+            # just change some random top corners
+            print('just change some random top corners...')
+            self.cube.turn_side('RDRRDDRRdr')
+            self.cube.turn_side('U')
+            self.cube.turn_side('RDRRDDRRdr')
+            self.cube.turn_side('u')
+            # recount top corners at wrong position
+            top_corners_on_correct_pos = np.array([])
+            for s in top_corners:
+                if self.cube.is_stone_pos_correct(s):
+                    top_corners_on_correct_pos = np.append(top_corners_on_correct_pos, s)
+            print('now number of top corners at correct position: ', top_corners_on_correct_pos.size)
+
+        if top_corners_on_correct_pos.size == 1:
+            while not (self.cube.stone_on_side(top_corners_on_correct_pos[0], SIDE_DIR_FRONT) and self.cube.stone_on_side(top_corners_on_correct_pos[0], SIDE_DIR_LEFT)):
+                self.cube.turn_side('C')
+            s1_UFR = self.cube.get_corner_stone(self.cube.get_color_of_side(SIDE_DIR_UP), self.cube.get_color_of_side(SIDE_DIR_FRONT), self.cube.get_color_of_side(SIDE_DIR_RIGHT))
+            s2_UBR = self.cube.get_corner_stone(self.cube.get_color_of_side(SIDE_DIR_UP), self.cube.get_color_of_side(SIDE_DIR_BACK), self.cube.get_color_of_side(SIDE_DIR_RIGHT))
+            #s3_UBL = self.cube.get_corner_stone(self.cube.get_color_of_side(SIDE_DIR_UP), self.cube.get_color_of_side(SIDE_DIR_BACK), self.cube.get_color_of_side(SIDE_DIR_LEFT))
+
+            if s2_UBR == self.cube.get_correct_stone(s1_UFR):
+                self.cube.turn_side('RDRRDDRRdr')
+                self.cube.turn_side('U')
+                self.cube.turn_side('RDRRDDRRdr')
+                self.cube.turn_side('u')
+            else:
+                self.cube.turn_side('U')
+                self.cube.turn_side('RDRRDDRRdr')
+                self.cube.turn_side('u')
+                self.cube.turn_side('RDRRDDRRdr')
+        else:
+            error('inconsistent position of top corners. Check line ', get_linenumber(), ERR_ACTION_EXIT)
+
+        runs = 0
+        turns = 0
+        for s in top_corners:
+            while not self.cube.is_stone_correct(s):
+                while not (self.cube.stone_on_side(s, SIDE_DIR_FRONT) and self.cube.stone_on_side(s, SIDE_DIR_RIGHT)):
+                    if runs == 0:
+                        self.cube.turn_side('C')
+                    else:
+                        turns = turns + 1
+                        self.cube.turn_side('U')
+                runs = runs + 1
+                self.cube.turn_side('RfrFRfrF')
+
+                if runs == 3:
+                    for i in range(turns):
+                        self.cube.turn_side('u')
+                    runs = 0
+                    turns = 0
 
 def main():
     if not RUN_ON_EV3:
@@ -684,8 +762,8 @@ def main():
         print('Motor start turning...')
 
     # turn sides
-    cube.turn_side('URurufUFUUulULUFuf') #wrong mid stones
-    #cube.turn_side('RBLF') #completely destroyed
+    #cube.turn_side('URurufUFUUulULUFuf') #wrong mid stones
+    cube.turn_side('RBLF') #completely destroyed
     #cube.turn_side('UFRUrufUUUFRUruf')
     #cube.turn_side('U')
 
@@ -699,6 +777,7 @@ def main():
     cube_solver.build_down_side()
     cube_solver.build_mid_ring()
     cube_solver.build_top_edges()
+    cube_solver.build_top_corners()
 
     if not RUN_ON_EV3:
         fig.show()
