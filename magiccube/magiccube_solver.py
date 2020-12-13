@@ -48,8 +48,11 @@ def get_linenumber():
     cf = currentframe()
     return cf.f_back.f_lineno
 
+def msg(message, lineno):
+    print(lineno, ': ', message)
+
 def error(message, lineno, action):
-    print(message, lineno, '--> action: ', action)
+    msg(message + ' --> action: ' + str(action), lineno)
     if action == ERR_ACTION_EXIT:
         exit(1)
 
@@ -399,6 +402,12 @@ class CubeSolver:
     def __init__(self, cube):
         self.cube = cube
 
+    def check_down_side(self):
+        for s in self.cube.stones:
+            if self.cube.stone_on_side(s, SIDE_DIR_DOWN) and not self.cube.is_stone_correct(s):
+                return False
+        return True
+
     def build_down_side(self):
         global while_counter
         # build edges on white side
@@ -455,9 +464,16 @@ class CubeSolver:
         # build corners on white side
         wrong_corner_stones = self.cube.get_wrong_corner_stones(self.cube.get_side_of_color(SIDE_COL_WHITE))
         print('number of wrong corner stones at white side: ', wrong_corner_stones.size)
+
+        print('wrong white corner stones:')
+        for cs in wrong_corner_stones:
+            print(cs.position, cs.faces[0].color, cs.faces[1].color, cs.faces[2].color)
+
         for ws in wrong_corner_stones:
             cs = self.cube.get_correct_stone(ws)
             cp = ws.position
+            print('move stone ', cs.faces[0].color, cs.faces[1].color, cs.faces[2].color, ' from pos ', cs.position, ' to pos ', cp)
+
             # check if stone not already on right place due to former moves
             if not self.cube.is_stone_correct(cs):
                 # ensure correct stone is on front side
@@ -476,7 +492,7 @@ class CubeSolver:
                     else:
                         error('error in solver: failed to move corner stone to front/upper side in line #', get_linenumber(), ERR_ACTION_EXIT)
                     print('correct corner stone on front/upper side')
-                    #print(cp, cs.position)
+
 
                 while_counter = 0
                 while not self.cube.is_min_corner_dist(cp, cs.position) and not error_endless_loop(4, get_linenumber()):
@@ -502,10 +518,38 @@ class CubeSolver:
                     elif cs.get_col_of_dir(SIDE_DIR_LEFT) == SIDE_COL_WHITE :
                         self.cube.turn_side('luL')
                     elif cs.get_col_of_dir(SIDE_DIR_UP) == SIDE_COL_WHITE :
-                        self.cube.turn_side('lURFuuf')
+                        self.cube.turn_side('lULFuuf')
                     else:
                         error('inconsistent faces of stone', get_linenumber(), ERR_ACTION_EXIT)
+
                 #print(cp, cs.position, np.dot(cp, cs.position))
+                print('move ', cs.faces[0].color, cs.faces[1].color, cs.faces[2].color, ' now at pos ', cs.position,
+                      ' planned pos was ', cp, ' therefore stone is: ', self.cube.is_stone_correct(cs))
+
+        print('endless loop for checking...')
+
+        while 1:
+            t.sleep(0.1)
+            self.cube.draw()
+            fig.show()
+            fig.canvas.flush_events()
+
+        if not self.check_down_side():
+            error('Error building down side', get_linenumber(), ERR_ACTION_EXIT)
+
+
+    def check_mid_ring(self):
+        mid_stones = np.array([])
+        mid_stones = np.append(mid_stones,
+                               [self.cube.get_edge_stone(SIDE_COL_RED, SIDE_COL_GREEN),
+                                self.cube.get_edge_stone(SIDE_COL_RED, SIDE_COL_BLUE),
+                                self.cube.get_edge_stone(SIDE_COL_ORANGE, SIDE_COL_GREEN),
+                                self.cube.get_edge_stone(SIDE_COL_ORANGE, SIDE_COL_BLUE)])
+        for s in mid_stones:
+            if not self.cube.is_stone_correct(s):
+                return False
+        return True
+
 
     def build_mid_ring(self):
         mid_stones = np.array([])
@@ -555,6 +599,22 @@ class CubeSolver:
                     self.cube.turn_side('ulULUFuf')
                 else:
                     error('mixed up mid stones in line ', get_linenumber(), ERR_ACTION_EXIT)
+
+        if not self.check_mid_ring():
+            error('Error building mid ring', get_linenumber(), ERR_ACTION_EXIT)
+
+    def check_top_edges(self):
+        top_edges = np.array([])
+        top_edges = np.append(top_edges,
+                               [self.cube.get_edge_stone(SIDE_COL_YELLOW, SIDE_COL_BLUE),
+                                self.cube.get_edge_stone(SIDE_COL_YELLOW, SIDE_COL_RED),
+                                self.cube.get_edge_stone(SIDE_COL_YELLOW, SIDE_COL_GREEN),
+                                self.cube.get_edge_stone(SIDE_COL_YELLOW, SIDE_COL_ORANGE)])
+        for s in top_edges:
+            if not self.cube.is_stone_correct(s):
+                return False
+        return True
+
 
     def build_top_edges(self):
         top_edges = np.array([])
@@ -665,6 +725,22 @@ class CubeSolver:
         while not self.cube.is_stone_correct(top_edges[0]):
             self.cube.turn_side('U')
 
+        if not self.check_top_edges():
+            error('Error building top edges', get_linenumber(), ERR_ACTION_EXIT)
+
+
+    def check_top_corners(self):
+        top_corners = np.array([])
+        top_corners = np.append(top_corners,
+                                [self.cube.get_corner_stone(SIDE_COL_YELLOW, SIDE_COL_BLUE, SIDE_COL_RED),
+                                 self.cube.get_corner_stone(SIDE_COL_YELLOW, SIDE_COL_BLUE, SIDE_COL_ORANGE),
+                                 self.cube.get_corner_stone(SIDE_COL_YELLOW, SIDE_COL_RED, SIDE_COL_GREEN),
+                                 self.cube.get_corner_stone(SIDE_COL_YELLOW, SIDE_COL_ORANGE, SIDE_COL_GREEN)])
+        for s in top_corners:
+            if not self.cube.is_stone_correct(s):
+                return False
+        return True
+
     def build_top_corners(self):
         top_corners = np.array([])
         top_corners = np.append(top_corners,
@@ -736,6 +812,9 @@ class CubeSolver:
                     runs = 0
                     turns = 0
 
+        if not self.check_top_corners():
+            error('Error building top corners', get_linenumber(), ERR_ACTION_EXIT)
+
 def main():
     if not RUN_ON_EV3:
         # init graphics
@@ -779,9 +858,13 @@ def main():
 
     cube_solver = CubeSolver(cube)
     cube_solver.build_down_side()
+    msg('build_down_side() finished', get_linenumber())
     cube_solver.build_mid_ring()
+    msg('build_mid_ring() finished', get_linenumber())
     cube_solver.build_top_edges()
+    msg('build_top_edges() finished', get_linenumber())
     cube_solver.build_top_corners()
+    msg('build_top_corners() finished', get_linenumber())
 
     if not RUN_ON_EV3:
         fig.show()
