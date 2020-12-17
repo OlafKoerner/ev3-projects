@@ -1,5 +1,5 @@
 
-from magiccube.magiccube_main import RUN_ON_EV3
+from magiccube_main import RUN_ON_EV3
 #import msvcrt as ms
 import numpy as np
 if not RUN_ON_EV3:
@@ -523,9 +523,9 @@ class CubeSolver:
                         error('inconsistent faces of stone', get_linenumber(), ERR_ACTION_EXIT)
 
                 #print(cp, cs.position, np.dot(cp, cs.position))
-                print('move ', cs.faces[0].color, cs.faces[1].color, cs.faces[2].color, ' now at pos ', cs.position,
-                      ' planned pos was ', cp, ' therefore stone is: ', self.cube.is_stone_correct(cs))
-
+                #print('move ', cs.faces[0].color, cs.faces[1].color, cs.faces[2].color, ' now at pos ', cs.position,
+                #      ' planned pos was ', cp, ' therefore stone is: ', self.cube.is_stone_correct(cs))
+        '''
         print('endless loop for checking...')
 
         while 1:
@@ -533,7 +533,7 @@ class CubeSolver:
             self.cube.draw()
             fig.show()
             fig.canvas.flush_events()
-
+        '''
         if not self.check_down_side():
             error('Error building down side', get_linenumber(), ERR_ACTION_EXIT)
 
@@ -787,6 +787,8 @@ class CubeSolver:
                 self.cube.turn_side('RDRRDDRRdr')
                 self.cube.turn_side('u')
                 self.cube.turn_side('RDRRDDRRdr')
+        elif top_corners_on_correct_pos.size == 4:
+            pass
         else:
             error('inconsistent position of top corners. Check line ', get_linenumber(), ERR_ACTION_EXIT)
 
@@ -816,6 +818,7 @@ class CubeSolver:
             error('Error building top corners', get_linenumber(), ERR_ACTION_EXIT)
 
 def main():
+    ax=0
     if not RUN_ON_EV3:
         # init graphics
         #fig = plt.figure()
@@ -846,9 +849,9 @@ def main():
     # turn sides
     #cube.turn_side('URurufUFUUulULUFuf') #wrong mid stones --> solved !!
     #cube.turn_side('RBLF') #completely destroyed --> solved !!
-    cube.turn_side('RBLFURBLF')  # completely destroyed --> NOT solved !! Problem at: "move mid stone to front"
+    #cube.turn_side('RBLFURBLF')  # completely destroyed --> NOT solved !! Problem at: "move mid stone to front"
     #cube.turn_side('UFRUrufUUUFRUruf')
-    #cube.turn_side('U')
+    cube.turn_side('U')
 
     if not RUN_ON_EV3:
         fig.show()

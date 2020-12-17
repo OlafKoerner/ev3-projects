@@ -4,7 +4,7 @@ import ev3dev.ev3 as ev3
 from time import sleep
 
 # connect motors to output ports
-from magiccube.magiccube_main import RUN_ON_EV3
+from magiccube_main import RUN_ON_EV3
 
 if RUN_ON_EV3:
     motor_a = ev3.Motor(ev3.OUTPUT_A)
@@ -33,10 +33,11 @@ def flip():
             motor_a.run_to_abs_pos(position_sp=motor_a_null_pos+100, speed_sp=200, stop_action='hold')
             while motor_a.is_running:
                 sleep(0.1)
+            sleep(1)
             motor_a.run_to_abs_pos(position_sp=motor_a_null_pos, speed_sp=200, stop_action='hold')
             while motor_a.is_running:
                 sleep(0.1)
-
+            sleep(1)
 def rot(x):
     if RUN_ON_EV3:
         if motor_b.connected:
@@ -46,6 +47,7 @@ def rot(x):
             while motor_b.is_running: sleep(0.1)
             motor_b.run_to_rel_pos(position_sp=+65 * x / abs(x), speed_sp=200, stop_action='hold')
             while motor_b.is_running: sleep(0.1)
+            sleep(1)
 
 def up():
     if RUN_ON_EV3:
@@ -186,7 +188,7 @@ def main(args):
     #btn = ev3.Button()
 
     # Connect color sensors
-    cs = ev3.ColorSensor(ev3.INPUT_1)
+    #cs = ev3.ColorSensor(ev3.INPUT_1)
 #    assert cs.connected
     
    
