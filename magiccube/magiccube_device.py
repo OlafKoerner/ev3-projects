@@ -41,11 +41,20 @@ def flip():
 def rot(x):
     if RUN_ON_EV3:
         if motor_b.connected:
-            motor_b.run_to_rel_pos(position_sp=-1082 * x, speed_sp=200, stop_action='hold')
+            motor_b.run_to_rel_pos(position_sp= -360 * 3 * x - 61 * x / abs(x), speed_sp=200, stop_action='hold')
             while motor_b.is_running: sleep(0.1)
-            motor_b.run_to_rel_pos(position_sp=-65 * x / abs(x), speed_sp=200, stop_action='hold')
+            #sleep(1)
+            #motor_b.run_to_rel_pos(position_sp=-65 * x / abs(x), speed_sp=200, stop_action='hold')
+            #while motor_b.is_running: sleep(0.1)
+            sleep(1)
+            motor_b.run_to_rel_pos(position_sp= +61 * x / abs(x), speed_sp=200, stop_action='hold')
             while motor_b.is_running: sleep(0.1)
-            motor_b.run_to_rel_pos(position_sp=+65 * x / abs(x), speed_sp=200, stop_action='hold')
+            sleep(1)
+
+def rot_free(x):
+    if RUN_ON_EV3:
+        if motor_b.connected:
+            motor_b.run_to_rel_pos(position_sp=-360 * 3 * x, speed_sp=200, stop_action='hold')
             while motor_b.is_running: sleep(0.1)
             sleep(1)
 
@@ -66,19 +75,19 @@ def up():
 # lower case letter means counter clockwise turn
 def turn_R():
     up()
-    rot(-0.25)
+    rot_free(-0.25)
     down()
     flip()
     rot(0.25)
     flip()
     up()
-    rot(-0.25)
+    rot_free(-0.25)
     flip()
     flip()
 
 def turn_r():
     up()
-    rot(-0.25)
+    rot_free(-0.25)
     down()
     flip()
     rot(-0.25)
@@ -90,7 +99,7 @@ def turn_r():
 
 def turn_L():
     up()
-    rot(0.25)
+    rot_free(0.25)
     down()
     flip()
     rot(0.25)
@@ -98,12 +107,11 @@ def turn_L():
     flip()
     flip()
     up()
-    rot(-0.25)
-
+    rot_free(-0.25)
 
 def turn_l():
     up()
-    rot(0.25)
+    rot_free(0.25)
     down()
     flip()
     rot(-0.25)
@@ -111,8 +119,7 @@ def turn_l():
     flip()
     flip()
     up()
-    rot(-0.25)
-
+    rot_free(-0.25)
 
 def turn_F():
     down()
@@ -122,7 +129,6 @@ def turn_F():
     flip()
     flip()
 
-
 def turn_f():
     down()
     flip()
@@ -130,7 +136,6 @@ def turn_f():
     flip()
     flip()
     flip()
-
 
 def turn_B():
     down()
@@ -140,7 +145,6 @@ def turn_B():
     rot(0.25)
     flip()
 
-
 def turn_b():
     down()
     flip()
@@ -149,7 +153,6 @@ def turn_b():
     rot(-0.25)
     flip()
 
-
 def turn_U():
     down()
     flip()
@@ -157,7 +160,6 @@ def turn_U():
     rot(0.25)
     flip()
     flip()
-
 
 def turn_u():
     down()
@@ -177,11 +179,11 @@ def turn_d():
 
 def turn_C():
     up()
-    rot(0.25)
+    rot_free(0.25)
 
 def turn_c():
     up()
-    rot(-0.25)
+    rot_free(-0.25)
 
 
 def main(args):
@@ -190,8 +192,7 @@ def main(args):
     # Connect color sensors
     #cs = ev3.ColorSensor(ev3.INPUT_1)
 #    assert cs.connected
-    
-   
+
     fNoColor = 0
     fBlack = 1
     fBlue = 2
