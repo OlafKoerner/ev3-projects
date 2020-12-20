@@ -3,6 +3,9 @@
 import ev3dev.ev3 as ev3
 from time import sleep
 
+MOT_RUNNING_WAIT_SECS = 0.1
+MOT_INERTIA_WAIT_SECS = 1.0
+
 # connect motors to output ports
 from magiccube_main import RUN_ON_EV3
 
@@ -25,45 +28,42 @@ def down():
         if motor_a.connected:
             motor_a.run_to_abs_pos(position_sp=motor_a_null_pos, speed_sp=200, stop_action='hold')
             while motor_a.is_running:
-                sleep(0.1)
+                sleep(MOT_RUNNIG_WAIT_SECS)
 
 def flip():
     if RUN_ON_EV3:
         if motor_a.connected:
-            motor_a.run_to_abs_pos(position_sp=motor_a_null_pos+100, speed_sp=200, stop_action='hold')
+            motor_a.run_to_abs_pos(position_sp=motor_a_null_pos+110, speed_sp=200, stop_action='hold')
             while motor_a.is_running:
-                sleep(0.1)
-            sleep(1)
+                sleep(MOT_RUNNIG_WAIT_SECS)
+            sleep(MOT_INERTIA_WAIT_SECS)
             motor_a.run_to_abs_pos(position_sp=motor_a_null_pos, speed_sp=200, stop_action='hold')
             while motor_a.is_running:
-                sleep(0.1)
-            sleep(1)
+                sleep(MOT_RUNNIG_WAIT_SECS)
+            sleep(MOT_INERTIA_WAIT_SECS)
 def rot(x):
     if RUN_ON_EV3:
         if motor_b.connected:
             motor_b.run_to_rel_pos(position_sp= -360 * 3 * x - 61 * x / abs(x), speed_sp=200, stop_action='hold')
-            while motor_b.is_running: sleep(0.1)
-            #sleep(1)
-            #motor_b.run_to_rel_pos(position_sp=-65 * x / abs(x), speed_sp=200, stop_action='hold')
-            #while motor_b.is_running: sleep(0.1)
-            sleep(1)
+            while motor_b.is_running: sleep(MOT_RUNNING_WAIT_SECS)
+            sleep(MOT_INERTIA_WAIT_SECS)
             motor_b.run_to_rel_pos(position_sp= +61 * x / abs(x), speed_sp=200, stop_action='hold')
-            while motor_b.is_running: sleep(0.1)
-            sleep(1)
+            while motor_b.is_running: sleep(MOT_RUNNING_WAIT_SECS)
+            sleep(MOT_INERTIA_WAIT_SECS)
 
 def rot_free(x):
     if RUN_ON_EV3:
         if motor_b.connected:
             motor_b.run_to_rel_pos(position_sp=-360 * 3 * x, speed_sp=200, stop_action='hold')
-            while motor_b.is_running: sleep(0.1)
-            sleep(1)
+            while motor_b.is_running: sleep(MOT_RUNNING_WAIT_SECS)
+            sleep(MOT_INERTIA_WAIT_SECS)
 
 def up():
     if RUN_ON_EV3:
         if motor_a.connected:
             motor_a.run_to_abs_pos(position_sp=motor_a_null_pos-100, speed_sp=200, stop_action='hold')
             while motor_a.is_running:
-                sleep(0.1)
+                sleep(MOT_RUNNING_WAIT_SECS)
 
 # definition of turns
 # 'R' turn right side clockwise
