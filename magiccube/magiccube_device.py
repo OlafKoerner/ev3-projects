@@ -23,31 +23,13 @@ if RUN_ON_EV3:
     if motor_c.connected: motor_c_null_pos = motor_c.position
 
 # definition of motor moves
-def down():
-    if RUN_ON_EV3:
-        if motor_a.connected:
-            motor_a.run_to_abs_pos(position_sp=motor_a_null_pos, speed_sp=200, stop_action='hold')
-            while motor_a.is_running:
-                sleep(MOT_RUNNIG_WAIT_SECS)
-
-def flip():
-    if RUN_ON_EV3:
-        if motor_a.connected:
-            motor_a.run_to_abs_pos(position_sp=motor_a_null_pos+110, speed_sp=200, stop_action='hold')
-            while motor_a.is_running:
-                sleep(MOT_RUNNIG_WAIT_SECS)
-            sleep(MOT_INERTIA_WAIT_SECS)
-            motor_a.run_to_abs_pos(position_sp=motor_a_null_pos, speed_sp=200, stop_action='hold')
-            while motor_a.is_running:
-                sleep(MOT_RUNNIG_WAIT_SECS)
-            sleep(MOT_INERTIA_WAIT_SECS)
 def rot(x):
     if RUN_ON_EV3:
         if motor_b.connected:
-            motor_b.run_to_rel_pos(position_sp= -360 * 3 * x - 61 * x / abs(x), speed_sp=200, stop_action='hold')
+            motor_b.run_to_rel_pos(position_sp= -360 * 3 * x - 60.5 * x / abs(x), speed_sp=200, stop_action='hold')
             while motor_b.is_running: sleep(MOT_RUNNING_WAIT_SECS)
             sleep(MOT_INERTIA_WAIT_SECS)
-            motor_b.run_to_rel_pos(position_sp= +61 * x / abs(x), speed_sp=200, stop_action='hold')
+            motor_b.run_to_rel_pos(position_sp= +60.5 * x / abs(x), speed_sp=200, stop_action='hold')
             while motor_b.is_running: sleep(MOT_RUNNING_WAIT_SECS)
             sleep(MOT_INERTIA_WAIT_SECS)
 
@@ -56,6 +38,24 @@ def rot_free(x):
         if motor_b.connected:
             motor_b.run_to_rel_pos(position_sp=-360 * 3 * x, speed_sp=200, stop_action='hold')
             while motor_b.is_running: sleep(MOT_RUNNING_WAIT_SECS)
+            sleep(MOT_INERTIA_WAIT_SECS)
+def down():
+    if RUN_ON_EV3:
+        if motor_a.connected:
+            motor_a.run_to_abs_pos(position_sp=motor_a_null_pos, speed_sp=200, stop_action='hold')
+            while motor_a.is_running:
+                sleep(MOT_RUNNING_WAIT_SECS)
+
+def flip():
+    if RUN_ON_EV3:
+        if motor_a.connected:
+            motor_a.run_to_abs_pos(position_sp=motor_a_null_pos+120, speed_sp=200, stop_action='hold')
+            while motor_a.is_running:
+                sleep(MOT_RUNNING_WAIT_SECS)
+            sleep(MOT_INERTIA_WAIT_SECS)
+            motor_a.run_to_abs_pos(position_sp=motor_a_null_pos, speed_sp=200, stop_action='hold')
+            while motor_a.is_running:
+                sleep(MOT_RUNNING_WAIT_SECS)
             sleep(MOT_INERTIA_WAIT_SECS)
 
 def up():
@@ -179,12 +179,35 @@ def turn_d():
 
 def turn_C():
     up()
-    rot_free(0.25)
+    rot_free(-0.25)
 
 def turn_c():
     up()
-    rot_free(-0.25)
+    rot_free(0.25)
 
+
+def turn_test():
+    num_loop = 20
+
+    for i in range(num_loop):
+        turn_D()
+        flip()
+
+    for i in range(num_loop):
+        flip()
+        flip()
+        flip()
+        turn_d()
+
+def read_stone_colors():
+    stone_colors_of_side = {}
+    stone_colors_of_side['y'] = ['y', 'y', 'y', 'y', 'y', 'y', 'y', 'y']
+    stone_colors_of_side['g'] = ['g', 'g', 'g', 'g', 'g', 'g', 'g', 'g']
+    stone_colors_of_side['r'] = ['r', 'r', 'r', 'r', 'r', 'r', 'r', 'r']
+    stone_colors_of_side['b'] = ['b', 'b', 'b', 'b', 'b', 'b', 'b', 'b']
+    stone_colors_of_side['c'] = ['c', 'c', 'c', 'c', 'c', 'c', 'c', 'c']
+    stone_colors_of_side['w'] = ['w', 'w', 'w', 'w', 'w', 'w', 'w', 'w']
+    return stone_colors_of_side
 
 def main(args):
     #btn = ev3.Button()

@@ -5,6 +5,8 @@ import magiccube_solver as mcs
 
 if __name__ == "__main__":
     try:
+        # pipe graphics through ssh to windows display with xterm:
+        # https://jensd.be/68/linux/remote-graphical-linux-applications-on-linux-and-windows
         mcs.main()
     except KeyboardInterrupt:
         pass

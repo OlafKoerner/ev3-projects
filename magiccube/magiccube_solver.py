@@ -812,23 +812,25 @@ def main():
     #cube.turn_side('URurufUFUUulULUFuf') #wrong mid stones --> solved !!
     #cube.turn_side('RBLF') #completely destroyed --> solved !!
     #cube.turn_side('RBLFURBLF')  # completely destroyed --> solved !!
-    cube.turn_side('UFRUrufUUUFRUruf')
+    #cube.turn_side('UFRUrufUUUFRUruf')
     #cube.turn_side('U')
+    mcd.turn_test()
 
     if not RUN_ON_EV3:
         fig.show()
         fig.canvas.flush_events()
-
+    '''
     cube_solver = CubeSolver(cube)
     cube_solver.build_down_side()
     msg('build_down_side() finished', get_linenumber())
+    
     cube_solver.build_mid_ring()
     msg('build_mid_ring() finished', get_linenumber())
     cube_solver.build_top_edges()
     msg('build_top_edges() finished', get_linenumber())
     cube_solver.build_top_corners()
     msg('build_top_corners() finished', get_linenumber())
-
+    '''
     if not RUN_ON_EV3:
         fig.show()
         fig.canvas.flush_events()
