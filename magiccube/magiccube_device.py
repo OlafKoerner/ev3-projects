@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 
 import ev3dev.ev3 as ev3
+import operator
 from time import sleep
 
 MOT_RUNNING_WAIT_SECS = 0.1
 MOT_INERTIA_WAIT_SECS = 1.0
+MOT_COL_POS_CORNER  = -315
+MOT_COL_POS_EDGE    = -340
+MOT_COL_POS_CENTER  = -380
 
 # connect motors to output ports
 from magiccube_main import RUN_ON_EV3
@@ -19,8 +23,12 @@ if RUN_ON_EV3:
     if motor_b.connected: motor_b_null_pos = motor_b.position
 
     motor_c = ev3.Motor(ev3.OUTPUT_C)
-    #assert motor_c.connected
+    assert motor_c.connected
     if motor_c.connected: motor_c_null_pos = motor_c.position
+
+    # connect color sensor
+    sensor_color = ev3.ColorSensor(ev3.INPUT_1)
+    assert sensor_color.connected
 
 # definition of motor moves
 def rot(x):
@@ -177,14 +185,23 @@ def turn_d():
     down()
     rot(-0.25)
 
-def turn_C():
+def turn_Y():
     up()
     rot_free(-0.25)
 
-def turn_c():
+def turn_y():
     up()
     rot_free(0.25)
 
+def turn_T():
+    up()
+    flip()
+
+def turn_t():
+    up()
+    flip()
+    flip()
+    flip()
 
 def turn_test():
     num_loop = 20
@@ -199,22 +216,51 @@ def turn_test():
         flip()
         turn_d()
 
-def read_stone_colors():
-    stone_colors_of_side = {}
-    stone_colors_of_side['y'] = ['y', 'y', 'y', 'y', 'y', 'y', 'y', 'y']
-    stone_colors_of_side['g'] = ['g', 'g', 'g', 'g', 'g', 'g', 'g', 'g']
-    stone_colors_of_side['r'] = ['r', 'r', 'r', 'r', 'r', 'r', 'r', 'r']
-    stone_colors_of_side['b'] = ['b', 'b', 'b', 'b', 'b', 'b', 'b', 'b']
-    stone_colors_of_side['c'] = ['c', 'c', 'c', 'c', 'c', 'c', 'c', 'c']
-    stone_colors_of_side['w'] = ['w', 'w', 'w', 'w', 'w', 'w', 'w', 'w']
-    return stone_colors_of_side
+def move_color_sensor_to_pos(pos):
+    if RUN_ON_EV3:
+        motor_c.run_to_abs_pos(position_sp=motor_c_null_pos + pos, speed_sp=200, stop_action='hold')
+        while motor_c.is_running:
+            sleep(MOT_RUNNING_WAIT_SECS)
+        sleep(MOT_INERTIA_WAIT_SECS)
+    return
 
+class RGBColor:
+    def __init__(self, r_mean, g_mean, b_mean, r_std, g_std, b_std):
+        self.r_mean = r_mean
+        self.g_mean = g_mean
+        self.b_mean = b_mean
+        self.r_std = r_std
+        self.g_std = g_std
+        self.b_std = b_std
+        self.z = 0
+        self.col = ''
+        return
+
+def read_color():
+    #if RUN_ON_EV3:
+        rgb_of_color = {}
+        rgb_of_color['g'] = RGBColor( 92, 302, 304, 5, 5, 5)
+        rgb_of_color['b'] = RGBColor( 45, 183, 239, 5, 5, 5)
+        rgb_of_color['w'] = RGBColor(346, 413, 345, 5, 5, 5)
+        rgb_of_color['r'] = RGBColor(227, 189, 121, 5, 5, 5)
+        rgb_of_color['c'] = RGBColor(256, 333, 398, 5, 5, 5)
+        rgb_of_color['y'] = RGBColor(276, 340, 404, 5, 5, 5)
+        for col in rgb_of_color:
+            rgb_of_color[col].z = (270 - rgb_of_color[col].r_mean) / rgb_of_color[col].r_std + \
+                    (340 - rgb_of_color[col].g_mean) / rgb_of_color[col].g_std + \
+                    (404 - rgb_of_color[col].b_mean) / rgb_of_color[col].b_std
+            rgb_of_color[col].col = col
+            '''
+            col.z = (sensor_color.red   - col.r) / r_std + \
+                    (sensor_color.green - col.g) / g_std + \
+                    (sensor_color.blue  - col.b) / b_std
+            '''
+        result = min(rgb_of_color.values(), key=operator.attrgetter('z')).col
+        return result
 def main(args):
     #btn = ev3.Button()
 
-    # Connect color sensors
-    #cs = ev3.ColorSensor(ev3.INPUT_1)
-#    assert cs.connected
+
 
     fNoColor = 0
     fBlack = 1
