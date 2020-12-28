@@ -224,15 +224,15 @@ class Cube:
 
     def init_physical_cube(self):
         # read colors of physical cube and store at digital twin
-        side = {0: SIDE_DIR_UP,
-                1: [SIDE_DIR_UP, SIDE_DIR_BACK],
-                2: [SIDE_DIR_UP, SIDE_DIR_BACK, SIDE_DIR_LEFT],
-                3: (SIDE_DIR_UP, SIDE_DIR_LEFT),
-                4: (SIDE_DIR_UP, SIDE_DIR_FRONT, SIDE_DIR_LEFT),
-                5: (SIDE_DIR_UP, SIDE_DIR_FRONT),
-                6: (SIDE_DIR_UP, SIDE_DIR_FRONT, SIDE_DIR_RIGHT),
-                7: (SIDE_DIR_UP, SIDE_DIR_RIGHT),
-                8: (SIDE_DIR_UP, SIDE_DIR_BACK, SIDE_DIR_RIGHT)}
+        dirs =  {0: [SIDE_DIR_UP],
+                 1: [SIDE_DIR_UP, SIDE_DIR_BACK],
+                 2: [SIDE_DIR_UP, SIDE_DIR_BACK, SIDE_DIR_LEFT],
+                 3: [SIDE_DIR_UP, SIDE_DIR_LEFT],
+                 4: [SIDE_DIR_UP, SIDE_DIR_FRONT, SIDE_DIR_LEFT],
+                 5: [SIDE_DIR_UP, SIDE_DIR_FRONT],
+                 6: [SIDE_DIR_UP, SIDE_DIR_FRONT, SIDE_DIR_RIGHT],
+                 7: [SIDE_DIR_UP, SIDE_DIR_RIGHT],
+                 8: [SIDE_DIR_UP, SIDE_DIR_BACK, SIDE_DIR_RIGHT]}
 
         move_up_all_cube_sides = self.create_MoveUpAllCubeSides()
         it_move_up_sides = iter(move_up_all_cube_sides)
@@ -240,8 +240,8 @@ class Cube:
             # measure all nine stone colors of upside
             cols = self.measure_upside_stone_colors()
             # store stone colors of upside
-            for n in side:
-                self.add_face_to_stone(self.get_stone_by_face_dirs(side[n]), Face(SIDE_DIR_UP, cols[n]))
+            for n in dirs:
+                self.add_face_to_stone(self.get_stone_by_face_dirs(dirs[n]), Face(SIDE_DIR_UP, cols[n]))
 
             '''
             # center stone color of upside
@@ -287,13 +287,13 @@ class Cube:
         s.faces = np.append(s.faces, f)
         return
 
-    def get_stone_by_face_dirs(self, *args):
+    def get_stone_by_face_dirs(self, dirs):
         for s in self.stones:
             sum = 0
-            for d in args:
+            for d in dirs:
                 if self.stone_on_side(s, d):
                     sum = sum + 1
-            if sum == len(args):
+            if sum == len(dirs):
                 return s
         error('stone not found by face directions', get_linenumber(), ERR_ACTION_EXIT)
         return
