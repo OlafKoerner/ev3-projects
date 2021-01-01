@@ -202,9 +202,9 @@ def turn_d():
     down()
     rot(-0.25)
 
-def turn_Y():
+def turn_Y(step=1):
     up()
-    rot_free(-0.25)
+    rot_free(-0.25*step)
 
 def turn_y():
     up()
@@ -245,9 +245,9 @@ def read_color():
     #if RUN_ON_EV3:
         z_score = {}
         for col in RGB_OF_COLOR:
-            z_score[col] = (270 - RGB_OF_COLOR[col].r_mean) / RGB_OF_COLOR[col].r_std + \
-                           (340 - RGB_OF_COLOR[col].g_mean) / RGB_OF_COLOR[col].g_std + \
-                           (404 - RGB_OF_COLOR[col].b_mean) / RGB_OF_COLOR[col].b_std
+            z_score[col] = abs(276 - RGB_OF_COLOR[col].r_mean) / RGB_OF_COLOR[col].r_std + \
+                           abs(340 - RGB_OF_COLOR[col].g_mean) / RGB_OF_COLOR[col].g_std + \
+                           abs(404 - RGB_OF_COLOR[col].b_mean) / RGB_OF_COLOR[col].b_std
             '''
             col.z = (sensor_color.red   - col.r) / r_std + \
                     (sensor_color.green - col.g) / g_std + \

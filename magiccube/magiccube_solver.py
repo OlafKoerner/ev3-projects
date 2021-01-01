@@ -2,6 +2,10 @@
 from magiccube_main import RUN_ON_EV3
 #import msvcrt as ms
 import numpy as np
+import sympy as sp
+def scos(x): return sp.N(sp.cos(x))
+def ssin(x): return sp.N(sp.sin(x))
+
 if not RUN_ON_EV3:
     import matplotlib
     matplotlib.use('TkAgg')
@@ -144,9 +148,36 @@ class Stone:
 
 class Cube:
     # class vars
+
+    def rotx(self, rounds = 0.25):
+        s = ssin(pi * rounds)
+        c = scos(pi * rounds)
+        return np.array([
+            [   1,  0,  0],
+            [   0,  c, -s],
+            [   0,  s,  c]])
+
+    def roty(self, rounds = 0.25):
+        s = ssin(pi * rounds)
+        c = scos(pi * rounds)
+        return np.array([
+            [   c,  0,  s],
+            [   0,  1,  0],
+            [  -s,  0,  c]])
+
+    def rotz(self, rounds = 0.25):
+        s = ssin(pi * rounds)
+        c = scos(pi * rounds)
+        return np.array([
+            [   c, -s,  0],
+            [   s,  c,  0],
+            [   0,  0,  1]])
+
     rotx = 0
     roty = 0
     rotz = 0
+
+
 
     def __init__(self, ax):
         self.subplot = ax
@@ -162,6 +193,7 @@ class Cube:
             (0, 1, 0), (0, -1, 0),
             (0, 0, 1), (0, 0, -1)
         ])
+
         self.rotx = np.array([
             [1, 0, 0],
             [0, 0, 1],
@@ -202,7 +234,7 @@ class Cube:
 
         def __next__(self):
             x = self.a
-            if x <= 3:
+            if 2 <= x <= 3:
                 self.parent.turn_side('T')
             elif x == 4:
                 self.parent.turn_side('Y')
@@ -293,7 +325,11 @@ class Cube:
             for d in dirs:
                 if self.stone_on_side(s, d):
                     sum = sum + 1
-            if sum == len(dirs):
+            sum_all = 0
+            for d_all in SIDE_DIRS:
+                if self.stone_on_side(s, d_all):
+                    sum_all = sum_all + 1
+            if sum == sum_all:
                 return s
         error('stone not found by face directions', get_linenumber(), ERR_ACTION_EXIT)
         return
@@ -307,7 +343,8 @@ class Cube:
                        mcd.MOT_COL_POS_EDGE, mcd.MOT_COL_POS_CORNER,
                        mcd.MOT_COL_POS_EDGE, mcd.MOT_COL_POS_CORNER]
         for (col_index, cmd, pos) in zip(range(9), cube_turn_cmd, mot_col_pos):
-            self.turn_side(cmd)
+            #self.turn_side(cmd)
+            if cmd == 'Y': self.turn_Y(1)
             mcd.move_color_sensor_to_pos(pos)
             cols[col_index] = mcd.read_color()
         return cols
@@ -418,10 +455,10 @@ class Cube:
         mcd.turn_b()
         return
 
-    def turn_Y(self):
+    def turn_Y(self, step=1):
         for s in self.stones:
-            s.rotate(self.rotz)
-        mcd.turn_Y()
+            s.rotate(self.rotz * step)
+        mcd.turn_Y(step)
         return
 
     def turn_y(self):
@@ -944,16 +981,17 @@ def main():
 
     # turn sides
     #cube.turn_side('URurufUFUUulULUFuf') #wrong mid stones --> solved !!
-    cube.turn_side('RBLF') #completely destroyed --> solved !!
+    #cube.turn_side('RBLF') #completely destroyed --> solved !!
     #cube.turn_side('RBLFURBLF')  # completely destroyed --> solved !!
     #cube.turn_side('UFRUrufUUUFRUruf')
     #cube.turn_side('U')
-    mcd.turn_test()
+    #mcd.turn_test()
 
     if not RUN_ON_EV3:
         fig.show()
         fig.canvas.flush_events()
 
+    '''
     cube_solver = CubeSolver(cube)
     cube_solver.build_down_side()
     msg('build_down_side() finished', get_linenumber())
@@ -963,7 +1001,8 @@ def main():
     msg('build_top_edges() finished', get_linenumber())
     cube_solver.build_top_corners()
     msg('build_top_corners() finished', get_linenumber())
-    
+    '''
+
     if not RUN_ON_EV3:
         fig.show()
         fig.canvas.flush_events()
