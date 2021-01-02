@@ -4,8 +4,11 @@ from magiccube_main import RUN_ON_EV3
 import numpy as np
 import sympy as sp
 PI = sp.pi
-def scos(x): return sp.N(sp.cos(x))
-def ssin(x): return sp.N(sp.sin(x))
+# sympy provides a symbolic solver, but...
+# numpy doesn't know how to handle sympy's Float type ==> thus, convert it to a numpy array
+# https://stackoverflow.com/questions/51617211/numpy-standard-deviation-attributeerror-float-object-has-no-attribute-sqrt
+def scos(x): return np.array(sp.N(sp.cos(x)), dtype=np.float)
+def ssin(x): return np.array(sp.N(sp.sin(x)), dtype=np.float)
 
 if not RUN_ON_EV3:
     import matplotlib
@@ -19,26 +22,29 @@ from time import sleep
 from inspect import currentframe
 import magiccube_device as mcd
 
+global GlobalColorCounter
+
+
 ERR_ACTION_EXIT = 1
-FACE_SIZE = 0.4
-SIDE_DIR_RED = (0, 1, 0)
-SIDE_COL_RED = 'r'
-SIDE_DIR_ORANGE = (0, -1, 0)
+FACE_SIZE       = 0.4
+SIDE_DIR_RED    = np.array([0, 1, 0])
+SIDE_COL_RED    = 'r'
+SIDE_DIR_ORANGE = np.array([0, -1, 0])
 SIDE_COL_ORANGE = 'c' # [1.0, 0.4, 0.0]
-SIDE_DIR_YELLOW = (0, 0, 1)
+SIDE_DIR_YELLOW = np.array([0, 0, 1])
 SIDE_COL_YELLOW = 'y'
-SIDE_DIR_WHITE = (0, 0, -1)
-SIDE_COL_WHITE = 'w'
-SIDE_DIR_GREEN = (-1, 0, 0)
-SIDE_COL_GREEN = 'g'
-SIDE_DIR_BLUE = (1, 0, 0)
-SIDE_COL_BLUE = 'b'
-SIDE_DIR_RIGHT = (0, 1, 0)
-SIDE_DIR_LEFT = (0, -1, 0)
-SIDE_DIR_BACK = (-1, 0, 0)
-SIDE_DIR_FRONT = (1, 0, 0)
-SIDE_DIR_UP = (0, 0, 1)
-SIDE_DIR_DOWN = (0, 0, -1)
+SIDE_DIR_WHITE  = np.array([0, 0, -1])
+SIDE_COL_WHITE  = 'w'
+SIDE_DIR_GREEN  = np.array([-1, 0, 0])
+SIDE_COL_GREEN  = 'g'
+SIDE_DIR_BLUE   = np.array([1, 0, 0])
+SIDE_COL_BLUE   = 'b'
+SIDE_DIR_RIGHT  = np.array([0, 1, 0])
+SIDE_DIR_LEFT   = np.array([0, -1, 0])
+SIDE_DIR_BACK   = np.array([-1, 0, 0])
+SIDE_DIR_FRONT  = np.array([1, 0, 0])
+SIDE_DIR_UP     = np.array([0, 0, 1])
+SIDE_DIR_DOWN   = np.array([0, 0, -1])
 SIDE_DIRS = np.array([SIDE_DIR_RIGHT, SIDE_DIR_LEFT, SIDE_DIR_BACK, SIDE_DIR_FRONT, SIDE_DIR_UP, SIDE_DIR_DOWN])
 
 def get_linenumber():
@@ -173,7 +179,7 @@ class Cube:
             [ 0.0,   s,   c]])
 
     def rotx_(self, rounds = -0.25):
-        return rotx(rounds)
+        return self.rotx(rounds=rounds)
 
     def roty(self, rounds = 0.25):
         s = ssin(2. * PI * rounds)
@@ -184,7 +190,7 @@ class Cube:
             [  -s,  0.0,  c]])
 
     def roty_(self, rounds = -0.25):
-        return roty(rounds)
+        return self.roty(rounds=rounds)
 
     def rotz(self, rounds = 0.25):
         s = ssin(2. * PI * rounds)
@@ -195,7 +201,7 @@ class Cube:
             [   0.0,  0.0,  1.0]])
 
     def rotz_(self, rounds = -0.25):
-        return rotz(rounds)
+        return self.rotz(rounds = rounds)
 
     class MoveUpAllCubeSides:
         def __init__(self, parent):
@@ -208,14 +214,15 @@ class Cube:
 
         def __next__(self):
             x = self.a
-            if 2 <= x <= 3:
-                self.parent.turn_side('T')
-            elif x == 4:
-                self.parent.turn_side('Y')
+            if 2 <= x <= 4:
                 self.parent.turn_side('T')
             elif x == 5:
+                self.parent.turn_side('Y')
+                self.parent.turn_side('T')
+            elif x == 6:
                 self.parent.turn_side('TT')
-            elif x > 5:
+            elif x > 6:
+                self.parent.turn_side('yyyTyyy')
                 raise StopIteration
             self.a += 1
             return x
@@ -242,51 +249,13 @@ class Cube:
 
         move_up_all_cube_sides = self.create_MoveUpAllCubeSides()
         it_move_up_sides = iter(move_up_all_cube_sides)
+        global i
         for i in it_move_up_sides:
             # measure all nine stone colors of upside
             cols = self.measure_upside_stone_colors()
             # store stone colors of upside
             for n in dirs:
                 self.add_face_to_stone(self.get_stone_by_face_dirs(dirs[n]), Face(SIDE_DIR_UP, cols[n]))
-
-            '''
-            # center stone color of upside
-            self.add_face_to_stone(
-                self.get_stone_by_face_dirs(SIDE_DIR_UP),
-                Face(SIDE_DIR_UP, cols[0]))
-            # back mid stone of upside
-            self.add_face_to_stone(
-                self.get_stone_by_face_dirs(SIDE_DIR_UP, SIDE_DIR_BACK),
-                Face(SIDE_DIR_UP, cols[1]))
-            # back/left corner stone of upside
-            self.add_face_to_stone(
-                self.get_stone_by_face_dirs(SIDE_DIR_UP, SIDE_DIR_BACK, SIDE_DIR_LEFT),
-                Face(SIDE_DIR_UP, cols[2]))
-            # left mid stone of upside
-            self.add_face_to_stone(
-                self.get_stone_by_face_dirs(SIDE_DIR_UP, SIDE_DIR_LEFT),
-                Face(SIDE_DIR_UP, cols[3]))
-            # front/left corner stone of upside
-            self.add_face_to_stone(
-                self.get_stone_by_face_dirs(SIDE_DIR_UP, SIDE_DIR_FRONT, SIDE_DIR_LEFT),
-                Face(SIDE_DIR_UP, cols[4]))
-            # front mid stone of upside
-            self.add_face_to_stone(
-                self.get_stone_by_face_dirs(SIDE_DIR_UP, SIDE_DIR_FRONT),
-                Face(SIDE_DIR_UP, cols[5]))
-            # front/right corner stone of upside
-            self.add_face_to_stone(
-                self.get_stone_by_face_dirs(SIDE_DIR_UP, SIDE_DIR_FRONT, SIDE_DIR_RIGHT),
-                Face(SIDE_DIR_UP, cols[6]))
-            # right mid stone of upside
-            self.add_face_to_stone(
-                self.get_stone_by_face_dirs(SIDE_DIR_UP, SIDE_DIR_RIGHT),
-                Face(SIDE_DIR_UP, cols[7]))
-            # back/right corner stone of upside
-            self.add_face_to_stone(
-                self.get_stone_by_face_dirs(SIDE_DIR_UP, SIDE_DIR_BACK, SIDE_DIR_RIGHT),
-                Face(SIDE_DIR_UP, cols[8]))
-            '''
         return
 
     def add_face_to_stone(self, s, f):
@@ -303,7 +272,7 @@ class Cube:
             for d_all in SIDE_DIRS:
                 if self.stone_on_side(s, d_all):
                     sum_all = sum_all + 1
-            if sum == sum_all:
+            if sum == sum_all == len(dirs):
                 return s
         error('stone not found by face directions', get_linenumber(), ERR_ACTION_EXIT)
         return
@@ -317,10 +286,12 @@ class Cube:
                        mcd.MOT_COL_POS_EDGE, mcd.MOT_COL_POS_CORNER,
                        mcd.MOT_COL_POS_EDGE, mcd.MOT_COL_POS_CORNER]
         for (col_index, cmd, pos) in zip(range(9), cube_turn_cmd, mot_col_pos):
-            #self.turn_side(cmd)
-            if cmd == 'Y': self.turn_Y(1.0)
+            if cmd == 'Y':
+                self.turn_Y(rounds=0.125)
             mcd.move_color_sensor_to_pos(pos)
-            cols[col_index] = mcd.read_color()
+            cols[col_index] = mcd.read_color(i-1) #debug OKO)
+        # 8 x 0.125 = one full turnaround
+        self.turn_Y(rounds=0.125)
         return cols
 
     def get_color_of_side(self, side):
@@ -357,97 +328,97 @@ class Cube:
             s.draw(self.subplot)
 
     # switcher functions
-    def turn_R(self):
+    def turn_R(self, rounds=0.25):
         for s in self.stones_side(SIDE_DIR_RIGHT):
-                    s.rotate(self.roty_())
-        mcd.turn_R()
+            s.rotate(self.roty_(rounds=rounds))
+        mcd.turn_R(rounds=rounds)
         return
 
-    def turn_r(self):
+    def turn_r(self, rounds=0.25):
         for s in self.stones_side(SIDE_DIR_RIGHT):
-            s.rotate(self.roty())
-        mcd.turn_r()
+            s.rotate(self.roty(rounds=rounds))
+        mcd.turn_r(rounds=rounds)
         return
 
-    def turn_L(self):
+    def turn_L(self, rounds=0.25):
         for s in self.stones_side(SIDE_DIR_LEFT):
-            s.rotate(self.roty())
-        mcd.turn_L()
+            s.rotate(self.roty(rounds=rounds))
+        mcd.turn_L(rounds=rounds)
         return
 
-    def turn_l(self):
+    def turn_l(self, rounds=0.25):
         for s in self.stones_side(SIDE_DIR_LEFT):
-            s.rotate(self.roty_())
-        mcd.turn_l()
+            s.rotate(self.roty_(rounds=rounds))
+        mcd.turn_l(rounds=rounds)
         return
 
-    def turn_U(self):
+    def turn_U(self, rounds=0.25):
         for s in self.stones_side(SIDE_DIR_UP):
-            s.rotate(self.rotz())
-        mcd.turn_U()
+            s.rotate(self.rotz(rounds=rounds))
+        mcd.turn_U(rounds=rounds)
         return
 
-    def turn_u(self):
+    def turn_u(self, rounds=0.25):
         for s in self.stones_side(SIDE_DIR_UP):
-            s.rotate(self.rotz_())
-        mcd.turn_u()
+            s.rotate(self.rotz_(rounds=rounds))
+        mcd.turn_u(rounds=rounds)
         return
 
-    def turn_D(self):
+    def turn_D(self, rounds=0.25):
         for s in self.stones_side(SIDE_DIR_DOWN):
-            s.rotate(self.rotz_())
-        mcd.turn_D()
+            s.rotate(self.rotz_(rounds=rounds))
+        mcd.turn_D(rounds=rounds)
         return
 
-    def turn_d(self):
+    def turn_d(self, rounds=0.25):
         for s in self.stones_side(SIDE_DIR_DOWN):
-            s.rotate(self.rotz())
-        mcd.turn_d()
+            s.rotate(self.rotz(rounds=rounds))
+        mcd.turn_d(rounds=rounds)
         return
 
-    def turn_F(self):
+    def turn_F(self, rounds=0.25):
         for s in self.stones_side(SIDE_DIR_FRONT):
-            s.rotate(self.rotx())
-        mcd.turn_F()
+            s.rotate(self.rotx(rounds=rounds))
+        mcd.turn_F(rounds=rounds)
         return
 
-    def turn_f(self):
+    def turn_f(self, rounds=0.25):
         for s in self.stones_side(SIDE_DIR_FRONT):
-            s.rotate(self.rotx_())
-        mcd.turn_f()
+            s.rotate(self.rotx_(rounds=rounds))
+        mcd.turn_f(rounds=rounds)
         return
 
-    def turn_B(self):
+    def turn_B(self, rounds=0.25):
         for s in self.stones_side(SIDE_DIR_BACK):
-            s.rotate(self.rotx())
-        mcd.turn_B()
+            s.rotate(self.rotx(rounds=rounds))
+        mcd.turn_B(rounds=rounds)
         return
 
-    def turn_b(self):
+    def turn_b(self, rounds=0.25):
         for s in self.stones_side(SIDE_DIR_BACK):
-            s.rotate(self.rotx_())
-        mcd.turn_b()
+            s.rotate(self.rotx_(rounds=rounds))
+        mcd.turn_b(rounds=rounds)
         return
 
-    def turn_Y(self, step=1):
+    def turn_Y(self, rounds=0.25):
         for s in self.stones:
-            s.rotate(self.rotz() * step)
-        mcd.turn_Y(step)
+            s.rotate(self.rotz(rounds=rounds))
+        mcd.turn_Y(rounds=rounds)
         return
 
-    def turn_y(self):
+    def turn_y(self, rounds=0.25):
         for s in self.stones:
-            s.rotate(self.rotz_())
-        mcd.turn_y()
+            s.rotate(self.rotz_(rounds=rounds))
+        mcd.turn_y(rounds=rounds)
         return
 
-    def turn_T(self):
+    def turn_T(self):   # tilt move must always be a quater, since device can only flip
         for s in self.stones:
             s.rotate(self.roty())
         mcd.turn_T()
         return
 
-    def turn_t(self):
+    def turn_t(self):   # tilt move must always be a quater, since device can only flip
         for s in self.stones:
             s.rotate(self.roty_())
         mcd.turn_t()
@@ -483,7 +454,6 @@ class Cube:
         return True
 
     def stone_on_side(self, s, side):
-        # print(s.position, ' * ', side, ' = ', np.dot(s.position, side))
         if np.dot(s.position, side) > 0:
             return True
         else:
@@ -511,9 +481,6 @@ class Cube:
         for f in ws.faces:
             current_face_colors = np.append(current_face_colors, f.color)
             target_face_colors = np.append(target_face_colors, self.get_color_of_side(f.direction))
-        #print('current face colors: ', current_face_colors)
-        #print('target face colors: ', target_face_colors)
-
         for s in self.stones:
             if s.faces.size == target_face_colors.size:
                 stone_face_colors = np.array([])
@@ -525,7 +492,6 @@ class Cube:
         error('correct stone not found', get_linenumber(), ERR_ACTION_EXIT)
 
     def is_min_corner_dist(self, cs1, cs2):
-        #print('corner dist: ', np.linalg.norm(cs1 - cs2))
         return np.linalg.norm(cs1 - cs2) == 2
 
 class CubeSolver:
@@ -940,8 +906,8 @@ def main():
 
     # init cube
     cube = Cube(ax)
-    cube.init_solved_cube()
-    #cube.init_physical_cube()
+    #cube.init_solved_cube()
+    cube.init_physical_cube()
 
     if not RUN_ON_EV3:
         #plt.show(block=False)

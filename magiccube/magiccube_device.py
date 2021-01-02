@@ -10,6 +10,9 @@ MOT_COL_POS_CORNER  = -315
 MOT_COL_POS_EDGE    = -340
 MOT_COL_POS_CENTER  = -380
 
+global GlobalColorArray #debug OKO
+GlobalColorArray = ['y', 'g', 'w', 'b', 'r', 'c'] #debug OKO
+
 class RGBColor:
     def __init__(self, r_mean, g_mean, b_mean, r_std, g_std, b_std):
         self.r_mean = r_mean
@@ -98,123 +101,123 @@ def up():
 # 'U' turn up side clockwise
 # 'D' turn down clockwise
 # lower case letter means counter clockwise turn
-def turn_R():
+def turn_R(rounds=0.25):
     up()
-    rot_free(-0.25)
+    rot_free(-rounds)
     down()
     flip()
-    rot(0.25)
+    rot(rounds)
     flip()
     up()
-    rot_free(-0.25)
+    rot_free(-rounds)
     flip()
     flip()
 
-def turn_r():
+def turn_r(rounds=0.25):
     up()
-    rot_free(-0.25)
+    rot_free(-rounds)
     down()
     flip()
-    rot(-0.25)
+    rot(-rounds)
     flip()
     up()
-    rot(-0.25)
+    rot(-rounds)
     flip()
     flip()
 
-def turn_L():
+def turn_L(rounds=0.25):
     up()
-    rot_free(0.25)
+    rot_free(rounds)
     down()
     flip()
-    rot(0.25)
-    flip()
-    flip()
-    flip()
-    up()
-    rot_free(-0.25)
-
-def turn_l():
-    up()
-    rot_free(0.25)
-    down()
-    flip()
-    rot(-0.25)
+    rot(rounds)
     flip()
     flip()
     flip()
     up()
-    rot_free(-0.25)
+    rot_free(-rounds)
 
-def turn_F():
-    down()
-    flip()
-    rot(0.25)
-    flip()
-    flip()
-    flip()
-
-def turn_f():
-    down()
-    flip()
-    rot(-0.25)
-    flip()
-    flip()
-    flip()
-
-def turn_B():
-    down()
-    flip()
-    flip()
-    flip()
-    rot(0.25)
-    flip()
-
-def turn_b():
-    down()
-    flip()
-    flip()
-    flip()
-    rot(-0.25)
-    flip()
-
-def turn_U():
-    down()
-    flip()
-    flip()
-    rot(0.25)
-    flip()
-    flip()
-
-def turn_u():
-    down()
-    flip()
-    flip()
-    rot(-0.25)
-    flip()
-    flip()
-
-def turn_D():
-    down()
-    rot(0.25)
-
-def turn_d():
-    down()
-    rot(-0.25)
-
-def turn_Y(step=1):
+def turn_l(rounds=0.25):
     up()
-    rot_free(-0.25*step)
-
-def turn_y():
+    rot_free(rounds)
+    down()
+    flip()
+    rot(-rounds)
+    flip()
+    flip()
+    flip()
     up()
-    rot_free(0.25)
+    rot_free(-rounds)
 
-def turn_T():
+def turn_F(rounds=0.25):
+    down()
+    flip()
+    rot(rounds)
+    flip()
+    flip()
+    flip()
+
+def turn_f(rounds=0.25):
+    down()
+    flip()
+    rot(-rounds)
+    flip()
+    flip()
+    flip()
+
+def turn_B(rounds=0.25):
+    down()
+    flip()
+    flip()
+    flip()
+    rot(rounds)
+    flip()
+
+def turn_b(rounds=0.25):
+    down()
+    flip()
+    flip()
+    flip()
+    rot(-rounds)
+    flip()
+
+def turn_U(rounds=0.25):
+    down()
+    flip()
+    flip()
+    rot(rounds)
+    flip()
+    flip()
+
+def turn_u(rounds=0.25):
+    down()
+    flip()
+    flip()
+    rot(-rounds)
+    flip()
+    flip()
+
+def turn_D(rounds=0.25):
+    down()
+    rot(rounds)
+
+def turn_d(rounds=0.25):
+    down()
+    rot(-rounds)
+
+def turn_Y(rounds=0.25):
+    up()
+    rot_free(-rounds)
+
+def turn_y(rounds=0.25):
+    up()
+    rot_free(rounds)
+
+def turn_T(): # tilt move must always be a quater, since device can only flip
     up()
     flip()
 
-def turn_t():
+def turn_t(): # tilt move must always be a quater, since device can only flip
     up()
     flip()
     flip()
@@ -241,18 +244,20 @@ def move_color_sensor_to_pos(pos):
         sleep(MOT_INERTIA_WAIT_SECS)
     return
 
-def read_color():
+def read_color(colorcounter):
     #if RUN_ON_EV3:
         z_score = {}
         for col in RGB_OF_COLOR:
-            z_score[col] = abs(276 - RGB_OF_COLOR[col].r_mean) / RGB_OF_COLOR[col].r_std + \
-                           abs(340 - RGB_OF_COLOR[col].g_mean) / RGB_OF_COLOR[col].g_std + \
-                           abs(404 - RGB_OF_COLOR[col].b_mean) / RGB_OF_COLOR[col].b_std
-            '''
+            z_score[col] = abs(RGB_OF_COLOR[GlobalColorArray[colorcounter]].r_mean - RGB_OF_COLOR[col].r_mean) / RGB_OF_COLOR[col].r_std + \
+                           abs(RGB_OF_COLOR[GlobalColorArray[colorcounter]].g_mean - RGB_OF_COLOR[col].g_mean) / RGB_OF_COLOR[col].g_std + \
+                           abs(RGB_OF_COLOR[GlobalColorArray[colorcounter]].b_mean - RGB_OF_COLOR[col].b_mean) / RGB_OF_COLOR[col].b_std
+            ''' #debug OKO
             col.z = (sensor_color.red   - col.r) / r_std + \
                     (sensor_color.green - col.g) / g_std + \
                     (sensor_color.blue  - col.b) / b_std
             '''
+
+
         return min(z_score, key=z_score.get)
 
 def main(args):
