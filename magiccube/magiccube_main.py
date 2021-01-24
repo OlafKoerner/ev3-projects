@@ -1,3 +1,14 @@
+'''
+Upgrade to Python 3.5.0: https://stackoverflow.com/questions/38393054/installing-python-3-5-via-apt-get
+sudo apt-get install libssl-dev openssl
+wget https://www.python.org/ftp/python/3.5.0/Python-3.5.0.tgz
+tar xzvf Python-3.5.0.tgz
+cd Python-3.5.0
+./configure
+make
+sudo make install
+'''
+
 import platform
 RUN_ON_EV3 = (platform.node() == 'ev3dev')
 import magiccube_device as mcd

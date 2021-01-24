@@ -1,10 +1,13 @@
-
+# install packages on ev3:
+# $ sudo apt-get update
+# $ sudo apt install python3-sympy python3-msvcrt
+# $ sudo apt-get install python3-pip
+# $ sudo pip3 install sympy
 from magiccube_main import RUN_ON_EV3
-import msvcrt as ms
+#import msvcrt as ms
 import numpy as np
 import sympy as sp
 PI = sp.pi
-
 
 if not RUN_ON_EV3:
     import matplotlib
@@ -23,6 +26,7 @@ import magiccube_device as mcd
 # https://stackoverflow.com/questions/51617211/numpy-standard-deviation-attributeerror-float-object-has-no-attribute-sqrt
 def scos(x): return np.array(sp.N(sp.cos(x)), dtype=np.float)
 def ssin(x): return np.array(sp.N(sp.sin(x)), dtype=np.float)
+
 #def wait(): return ms.getch()
 def wait(): sleep(GFX_WAIT_SECS)
 #def wait():
